@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const LOOPING_STRING = "FISH, JASON, 北小企 ARE FREE!!!XDDDDD";
+const LOOPING_STRING = "FISH, JASON ARE FREE!!!XDDDDD";
 const ENDING_STRING = "Congratulations!!!!!! You made it!";
 // Change this variable to set when the countdown ends.
 const COUNTDOWN_END = new Date("2026-07-31T18:05:00");
@@ -18,14 +18,6 @@ const COLORS: Record<string, string> = {
   ".": "transparent",
 };
 const LUIGI_COLORS: Record<string, string> = { ...COLORS, R: "#22b14c" };
-const PENGUIN_COLORS: Record<string, string> = {
-  B: "#1c1c28", // black body
-  W: "#f4f4f0", // white belly
-  Y: "#f0c040", // yellow beak / feet
-  E: "#ffffff", // eye white
-  M: "#0a0a0a", // pupil
-  ".": "transparent",
-};
 
 const BODY = [
   "...RRRRR....",
@@ -44,24 +36,6 @@ const BODY = [
 const LEGS_RUN_A = ["..OO....OO..", "..HH....HH..", ".HHH....HHH."];
 const LEGS_RUN_B = ["..OOO..OOO..", "...HH..HH...", "..HHH..HHH.."];
 const LEGS_JUMP = [".OOO....OOO.", "..HH....HH..", ".HHH....HHH."];
-
-const PENGUIN_BODY = [
-  "....BBBB....",
-  "...BBBBBB...",
-  "..BBBBBBBB..",
-  "..BEMEBMEB..",
-  "..BBBYYBBB..",
-  "..BBWWWWBB..",
-  "..BWWWWWWB..",
-  "..BWWWWWWB..",
-  "..BBWWWWBB..",
-  "...BBBBBB...",
-  "..BBBBBBBB..",
-  ".BBBBBBBBBB.",
-];
-const PENGUIN_LEGS_A = ["..BB....BB..", "..YY....YY..", ".YYY....YYY."];
-const PENGUIN_LEGS_B = ["..BBB..BBB..", "...YY..YY...", "..YYY..YYY.."];
-const PENGUIN_LEGS_JUMP = [".BBB....BBB.", "..YY....YY..", ".YYY....YYY."];
 
 function buildShadow(
   rows: string[],
@@ -87,26 +61,12 @@ function buildFrames(colors: Record<string, string>) {
   };
 }
 
-function buildPenguinFrames() {
-  return {
-    A: buildShadow([...PENGUIN_BODY, ...PENGUIN_LEGS_A], PENGUIN_COLORS, PIXEL),
-    B: buildShadow([...PENGUIN_BODY, ...PENGUIN_LEGS_B], PENGUIN_COLORS, PIXEL),
-    JUMP: buildShadow(
-      [...PENGUIN_BODY, ...PENGUIN_LEGS_JUMP],
-      PENGUIN_COLORS,
-      PIXEL,
-    ),
-  };
-}
-
 const MARIO_FRAMES = buildFrames(COLORS);
 const LUIGI_FRAMES = buildFrames(LUIGI_COLORS);
-const PENGUIN_FRAMES = buildPenguinFrames();
 
 const CHARACTERS = [
   { name: "Fish", xRatio: 0.34, frames: MARIO_FRAMES },
   { name: "Jason", xRatio: 0.22, frames: LUIGI_FRAMES },
-  { name: "北小企", xRatio: 0.1, frames: PENGUIN_FRAMES },
 ];
 
 /* ---------- Castle (end-of-level) ---------- */
