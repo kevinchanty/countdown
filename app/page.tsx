@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from "react";
 
 const LOOPING_STRING = "FISH, JASON ARE FREE!!!XDDDDD";
 const ENDING_STRING = "Congratulations!!!!!! You made it!";
@@ -194,6 +199,15 @@ const END_LABEL = (() => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 })();
 
+function bindRef(
+  refs: MutableRefObject<(HTMLDivElement | null)[]>,
+  i: number,
+) {
+  return (el: HTMLDivElement | null) => {
+    refs.current[i] = el;
+  };
+}
+
 export default function Page() {
   const remaining = useCountdown(COUNTDOWN_END);
   const remainingRef = useRef(remaining);
@@ -212,32 +226,54 @@ export default function Page() {
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
   const decoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  useEffect(() => {
-    const stage = stageRef.current!;
-    const ground = groundRef.current!;
-    const star = starRef.current!;
-    const castleEl = castleRef.current!;
-    const flagEl = flagRef.current!;
+  const decoRefCbs = useRef(DECO.map((_, i) => bindRef(decoRefs, i))).current;
+  const blockRefCbs = useRef(
+    Array.from({ length: BLOCK_COUNT }, (_, i) => bindRef(blockRefs, i)),
+  ).current;
+  const charShadowRefCbs = useRef(
+    CHARACTERS.map((_, i) => bindRef(charShadowRefs, i)),
+  ).current;
+  const charRefCbs = useRef(
+    CHARACTERS.map((_, i) => bindRef(charRefs, i)),
+  ).current;
+  const charSpriteRefCbs = useRef(
+    CHARACTERS.map((_, i) => bindRef(charSpriteRefs, i)),
+  ).current;
 
-    const STAGE_W = stage.clientWidth;
-    const STAGE_H = stage.clientHeight;
+  useEffect(() => {
+    const stage = stageRef.current;
+    const ground = groundRef.current;
+    const star = starRef.current;
+    const castleEl = castleRef.current;
+    const flagEl = flagRef.current;
+    if (!stage || !ground || !star || !castleEl || !flagEl) return;
+
     const CHAR_W = 36;
     const CHAR_H = 45;
     const SPEED = 2.0; // world px per frame
-    const GROUND_PX = STAGE_H * 0.38; // matches CSS ground height
-    const STOP_DOOR_X = STAGE_W * 0.62; // where the castle door stops
-
     const BLOCK_W = 46;
     const BLOCK_LIFT = 58; // px above the ground (matches CSS margin-bottom)
-    const BLOCK_BOTTOM_Y = GROUND_PX + BLOCK_LIFT;
-
     const JUMP_DUR = 720;
     const JUMP_HEIGHT = 84;
     const STAR_POWER_MS = 5500;
 
+    let STAGE_W = stage.clientWidth;
+    let STAGE_H = stage.clientHeight;
+    let GROUND_PX = STAGE_H * 0.38;
+    let STOP_DOOR_X = STAGE_W * 0.62;
+    let BLOCK_BOTTOM_Y = GROUND_PX + BLOCK_LIFT;
+
+    const measure = () => {
+      STAGE_W = stage.clientWidth;
+      STAGE_H = stage.clientHeight;
+      GROUND_PX = STAGE_H * 0.38;
+      STOP_DOOR_X = STAGE_W * 0.62;
+      BLOCK_BOTTOM_Y = GROUND_PX + BLOCK_LIFT;
+    };
+
     // per-character runtime state
     const chars = CHARACTERS.map((c, i) => ({
-      x: STAGE_W * c.xRatio,
+      x: Math.max(STAGE_W, 1) * c.xRatio,
       jumping: false,
       jumpStart: 0,
       jumpTarget: -1,
@@ -251,7 +287,7 @@ export default function Page() {
 
     // blocks: randomly spaced, each randomly assigned to a character
     const blocks: BlockState[] = [];
-    let spawnX = STAGE_W + 60;
+    let spawnX = Math.max(STAGE_W, 320) + 60;
     for (let i = 0; i < BLOCK_COUNT; i++) {
       blocks.push({
         worldX: spawnX,
@@ -280,8 +316,44 @@ export default function Page() {
     };
 
     let raf = 0;
+    let cancelled = false;
     let last = performance.now();
+    let initedPositions = STAGE_W > 0;
+
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => {
+            const prevW = STAGE_W;
+            measure();
+            if (!initedPositions && STAGE_W > 0) {
+              chars.forEach((ch, i) => {
+                ch.x = STAGE_W * CHARACTERS[i].xRatio;
+              });
+              let x = STAGE_W + 60;
+              blocks.forEach((b) => {
+                b.worldX = x;
+                x += randomGap();
+              });
+              initedPositions = true;
+            } else if (prevW > 0 && STAGE_W > 0 && prevW !== STAGE_W) {
+              const scale = STAGE_W / prevW;
+              chars.forEach((ch) => {
+                ch.x *= scale;
+              });
+            }
+          })
+        : null;
+    ro?.observe(stage);
+
     const loop = (now: number) => {
+      if (cancelled) return;
+
+      if (STAGE_W <= 0 || STAGE_H <= 0) {
+        measure();
+        raf = requestAnimationFrame(loop);
+        return;
+      }
+
       const dt = Math.min(40, now - last);
       last = now;
       const step = dt / 16.67;
@@ -461,32 +533,37 @@ export default function Page() {
       if (state.star.active) {
         const st = state.star;
         const target = chars[st.target];
-        const targetX = target.x + CHAR_W / 2;
-        const targetY = GROUND_PX + CHAR_H / 2;
-        const elapsed = now - st.born;
-        if (elapsed < 220) {
-          st.y += 4.2; // pop straight up out of the block
-        } else {
-          st.vx += (targetX - st.x) * 0.014;
-          st.vy += (targetY - st.y) * 0.02;
-          st.vx = Math.max(-8, Math.min(8, st.vx));
-          st.vy = Math.max(-8, Math.min(8, st.vy));
-          st.x += st.vx;
-          st.y += st.vy;
-        }
-        const d = Math.hypot(st.x - targetX, st.y - targetY);
-        if (d < 22) {
-          state.star.active = false; // consumed
+        if (!target) {
+          state.star.active = false;
           star.style.display = "none";
-          chars[st.target].starPowerUntil = now + STAR_POWER_MS;
         } else {
-          const scaleIn = Math.min(1, elapsed / 160);
-          const shrink = d < 90 ? Math.max(0.25, d / 90) : 1;
-          const hue = ((now / 70) * 60) % 360;
-          const flash = Math.floor(now / 90) % 2 === 0 ? 1.35 : 1.05;
-          star.style.display = "block";
-          star.style.filter = `hue-rotate(${hue}deg) saturate(2.4) brightness(${flash}) drop-shadow(0 0 8px hsl(${hue} 100% 60%))`;
-          star.style.transform = `translate(${st.x - 19}px, ${-st.y - 19}px) scale(${scaleIn * shrink})`;
+          const targetX = target.x + CHAR_W / 2;
+          const targetY = GROUND_PX + CHAR_H / 2;
+          const elapsed = now - st.born;
+          if (elapsed < 220) {
+            st.y += 4.2; // pop straight up out of the block
+          } else {
+            st.vx += (targetX - st.x) * 0.014;
+            st.vy += (targetY - st.y) * 0.02;
+            st.vx = Math.max(-8, Math.min(8, st.vx));
+            st.vy = Math.max(-8, Math.min(8, st.vy));
+            st.x += st.vx;
+            st.y += st.vy;
+          }
+          const d = Math.hypot(st.x - targetX, st.y - targetY);
+          if (d < 22) {
+            state.star.active = false; // consumed
+            star.style.display = "none";
+            target.starPowerUntil = now + STAR_POWER_MS;
+          } else {
+            const scaleIn = Math.min(1, elapsed / 160);
+            const shrink = d < 90 ? Math.max(0.25, d / 90) : 1;
+            const hue = ((now / 70) * 60) % 360;
+            const flash = Math.floor(now / 90) % 2 === 0 ? 1.35 : 1.05;
+            star.style.display = "block";
+            star.style.filter = `hue-rotate(${hue}deg) saturate(2.4) brightness(${flash}) drop-shadow(0 0 8px hsl(${hue} 100% 60%))`;
+            star.style.transform = `translate(${st.x - 19}px, ${-st.y - 19}px) scale(${scaleIn * shrink})`;
+          }
         }
       }
 
@@ -521,7 +598,11 @@ export default function Page() {
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      ro?.disconnect();
+    };
   }, []);
 
   return (
@@ -540,21 +621,13 @@ export default function Page() {
             key={i}
             className={`deco deco--${d.kind}`}
             style={d.top ? { top: d.top } : undefined}
-            ref={(el) => {
-              decoRefs.current[i] = el;
-            }}
+            ref={decoRefCbs[i]}
           />
         ))}
         <div className="ground" ref={groundRef} />
         {/* blocks */}
         {Array.from({ length: BLOCK_COUNT }).map((_, i) => (
-          <div
-            key={i}
-            className="block"
-            ref={(el) => {
-              blockRefs.current[i] = el;
-            }}
-          >
+          <div key={i} className="block" ref={blockRefCbs[i]}>
             <div className="block__box" />
           </div>
         ))}
@@ -569,9 +642,7 @@ export default function Page() {
           <div
             key={`shadow-${i}`}
             className="mario__shadow"
-            ref={(el) => {
-              charShadowRefs.current[i] = el;
-            }}
+            ref={charShadowRefCbs[i]}
           />
         ))}
         {CHARACTERS.map((c, i) => (
@@ -579,12 +650,8 @@ export default function Page() {
             key={c.name}
             name={c.name}
             initialFrame={c.frames.A}
-            charRef={(el) => {
-              charRefs.current[i] = el;
-            }}
-            spriteRef={(el) => {
-              charSpriteRefs.current[i] = el;
-            }}
+            charRef={charRefCbs[i]}
+            spriteRef={charSpriteRefCbs[i]}
           />
         ))}
         {/* end-of-level castle (painted above the characters) */}
