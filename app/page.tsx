@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const LOOPING_STRING = "FISH, JASON ARE FREE!!!XDDDDD";
 const ENDING_STRING = "Congratulations!!!!!! You made it!";
 // Change this variable to set when the countdown ends.
-const COUNTDOWN_END = new Date("2026-07-31T18:05:00");
+const COUNTDOWN_END = new Date("2026-08-31T18:05:00");
 
 /* ---------- Pixel characters (via box-shadow) ---------- */
 const PIXEL = 3;
