@@ -10,7 +10,7 @@ import {
 const LOOPING_STRING = "FISH, JASON ARE FREE!!!XDDDDD";
 const ENDING_STRING = "Congratulations!!!!!! You made it!";
 // Change this variable to set when the countdown ends.
-const COUNTDOWN_END = new Date("2026-08-31T18:05:00");
+const COUNTDOWN_END = new Date("2026-08-04T22:30:00");
 
 /* ---------- Pixel characters (via box-shadow) ---------- */
 const PIXEL = 3;
@@ -110,9 +110,149 @@ const CASTLE_MAP = [
   "..WWWWWWWWWKKKKKKWWWWWWW..",
 ];
 const CASTLE_SHADOW = buildShadow(CASTLE_MAP, CASTLE_COLORS, CASTLE_PIXEL);
-const CASTLE_W = 26 * CASTLE_PIXEL; // 104
-const CASTLE_H = CASTLE_MAP.length * CASTLE_PIXEL; // 104
 const DOOR_X = 13.5 * CASTLE_PIXEL; // door center from castle left = 54
+
+/* ---------- Bullet Bill Pixel Character ---------- */
+const BULLET_COLORS: Record<string, string> = {
+  ".": "transparent",
+  B: "#000000", // Black body & outline
+  G: "#4a4a4a", // Dark gray band / groove
+  W: "#ffffff", // White highlight, eye, & teeth
+  E: "#000000", // Pupil / angry brow
+  R: "#e52521", // Red mouth cavity
+};
+
+// 20x16 pixel map drawn facing right (matching the image)
+const BB_MAP = [
+  "......BBBBBBBBBB....",
+  "....BBBBBBBWWWWWBB..",
+  "..BBBBBBBBBBBBBBBBBB",
+  ".BBBBBGBBBBBBBBBBBBB",
+  ".BBBBBGBBBBBBBBBBBBB",
+  ".BBBBBGBBBBBBBBWBBBB",
+  ".BBBBBGBBBBBBBWWEBBB",
+  ".BBBBBGBBBBBBWWWWBBB",
+  ".BBBBBGBBBBBBBBBBBBB",
+  ".BBBBBGBBBBBRRWRWRWR",
+  ".BBBBBGBBBBBBWRRRRRB",
+  ".BBBBBGBBBBBBBRRRRRB",
+  "..BBBBGBBBBBBBBWRRB.",
+  "....BBGBBBBBBBBBBB..",
+  "......BBBBBBBBBB....",
+  "....................",
+];
+const BB_SHADOW = buildShadow(BB_MAP, BULLET_COLORS, PIXEL);
+const BB_W = 20 * PIXEL;
+
+/* ---------- Kirby ---------- */
+const KIRBY_COLORS: Record<string, string> = {
+  ".": "transparent",
+  B: "#000000",
+  P: "#ff8ab4",
+  L: "#ffbada",
+  D: "#d15886",
+  C: "#e81e69",
+  W: "#ffffff",
+  E: "#231121",
+  R: "#d80038",
+  K: "#6c0019",
+};
+
+const KIRBY_BODY = [
+  "......BBBBB.....",
+  "....BBDLLLDB....",
+  "...BDLLLLLLLLB..",
+  "..BDLLWBLWBLLB..",
+  "..BLLLWBLWBLLLB.",
+  ".BLLLLLBLLBLLLB.",
+  "BDLLLDDLLLDDLLB.",
+  "BLLDLLLLBLLLLLB.",
+  "BLLDLLLLBLLLLB..",
+  ".BLLLLLLLLLLBB..",
+  "..BBLLLLLLLBB...",    
+];
+
+const KIRBY_WALK_A_FEET = [
+  "...BBLLLLLBB....",
+  "...BBRRRRRRKB...",
+  "...BRRRRRRRRK...",
+  "...BKKKKKKKKB...",
+  "....BBBBBBBB....",
+];
+
+const KIRBY_WALK_B_FEET = [
+  "...BLLLLLLBB....",
+  "..BRRKB..BRRKB..",
+  ".BKKKB....BKKKB.",
+  "BBBB.......BBBB.",
+  "................",
+];
+
+const KIRBY_FRAMES = {
+  A: buildShadow([...KIRBY_BODY, ...KIRBY_WALK_A_FEET], KIRBY_COLORS, PIXEL),
+  B: buildShadow([...KIRBY_BODY, ...KIRBY_WALK_B_FEET], KIRBY_COLORS, PIXEL),
+};
+const KIRBY_W = 16 * PIXEL;
+
+/* ---------- Toad (16px wide, legs included) ---------- */
+const TOAD_COLORS: Record<string, string> = {
+  ".": "transparent",
+  R: "#e52521", // mushroom cap red
+  W: "#ffffff", // white spots
+  T: "#f9c89b", // face / skin
+  K: "#000000", // eyes
+  B: "#2057d6", // blue vest
+  N: "#8b4513", // shoes
+};
+
+const TOAD_MAP = [
+  "....KKKKKKKK....",
+  "...KWWWRRWWWK...",
+  "..KRRWWRRWWRRK..",
+  ".KRRWWWWWWWWRRK.",
+  "KRWWWWKKKKKWWWRK",
+  "KWWWKTTTTTTKWWWK",
+  ".KWKTTKTTKTTKWK.",
+  "..KTTTTKKTTTTK..",
+  "...KTTTTTTTTK...",
+  "....KKKKKKKK....",
+  "..KKBBTTTTTBKK..",
+  ".KTKBBBTTTBBKTK.",
+  "KTTKBBBKKKBBKTTK",
+  ".K.KKKKWWWKKK.K.",
+  "..KWWWWWWWWWK...",
+  "...KNNNKNNNK....",
+  "..KNNNNKNNNNK...",
+  "...KKKKKKKKK....",  
+];
+
+// slight foot shift for walk cycle
+const TOAD_MAP_B = [
+  "....KKKKKKKK....",
+  "...KWWWRRWWWK...",
+  "..KRRWWRRWWRRK..",
+  ".KRRWWWWWWWWRRK.",
+  "KRWWWWKKKKKWWWRK",
+  "KWWWKTTTTTTKWWWK",
+  ".KWKTTKTTKTTKWK.",
+  "..KTTTTKKTTTTK..",
+  "...KTTTTTTTTK...",
+  "....KKKKKKKK....",
+  "..KKBBTTTTTBKK..",
+  ".KTKBBBTTTBBKTK.",
+  "KTTKBBBKKKBBKTTK",
+  ".K.KKKKWWWKKK.K.",
+  "..KWWWWWWWWWK...",
+  ".KNNNK....KNNK..",
+  "KNNNNK...KNNNNK.",
+  ".KKKK.....KKKK..",  
+];
+
+const TOAD_FRAMES = {
+  A: buildShadow(TOAD_MAP, TOAD_COLORS, PIXEL),
+  B: buildShadow(TOAD_MAP_B, TOAD_COLORS, PIXEL),
+};
+const TOAD_W = 16 * PIXEL;
 
 function Character({
   name,
@@ -192,13 +332,6 @@ type Star = {
 };
 
 /* ---------- Page ---------- */
-// Locale-independent label (server and client must render identical text).
-const END_LABEL = (() => {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const d = COUNTDOWN_END;
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-})();
-
 function bindRef(
   refs: MutableRefObject<(HTMLDivElement | null)[]>,
   i: number,
@@ -215,11 +348,40 @@ export default function Page() {
     remainingRef.current = remaining;
   }, [remaining]);
 
+  // after Kirby appears, timer switches from countdown to count-up
+  const [countUpStart, setCountUpStart] = useState<number | null>(null);
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const startCountUpRef = useRef(() => {});
+  useEffect(() => {
+    startCountUpRef.current = () => {
+      setCountUpStart((prev) => prev ?? Date.now());
+    };
+  }, []);
+  useEffect(() => {
+    if (countUpStart === null) return;
+    const tick = () => setElapsedMs(Date.now() - countUpStart);
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [countUpStart]);
+
+  const countingUp = countUpStart !== null;
+  const timerMs = countingUp ? elapsedMs : remaining;
+
   const stageRef = useRef<HTMLDivElement>(null);
   const groundRef = useRef<HTMLDivElement>(null);
   const starRef = useRef<HTMLDivElement>(null);
   const castleRef = useRef<HTMLDivElement>(null);
   const flagRef = useRef<HTMLDivElement>(null);
+  const volcanoSkyRef = useRef<HTMLDivElement>(null);
+  const volcanoPageRef = useRef<HTMLDivElement>(null);
+  const bulletRef = useRef<HTMLDivElement>(null);
+  const toadRef = useRef<HTMLDivElement>(null);
+  const toadSpriteRef = useRef<HTMLDivElement>(null);
+  const toadShadowRef = useRef<HTMLDivElement>(null);
+  const kirbyRef = useRef<HTMLDivElement>(null);
+  const kirbySpriteRef = useRef<HTMLDivElement>(null);
+  const kirbyShadowRef = useRef<HTMLDivElement>(null);
   const charRefs = useRef<(HTMLDivElement | null)[]>([]);
   const charSpriteRefs = useRef<(HTMLDivElement | null)[]>([]);
   const charShadowRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -246,7 +408,32 @@ export default function Page() {
     const star = starRef.current;
     const castleEl = castleRef.current;
     const flagEl = flagRef.current;
-    if (!stage || !ground || !star || !castleEl || !flagEl) return;
+    const volcanoSky = volcanoSkyRef.current;
+    const volcanoPage = volcanoPageRef.current;
+    const bulletEl = bulletRef.current;
+    const toadEl = toadRef.current;
+    const toadSpriteEl = toadSpriteRef.current;
+    const toadShadowEl = toadShadowRef.current;
+    const kirbyEl = kirbyRef.current;
+    const kirbySpriteEl = kirbySpriteRef.current;
+    const kirbyShadowEl = kirbyShadowRef.current;
+    if (
+      !stage ||
+      !ground ||
+      !star ||
+      !castleEl ||
+      !flagEl ||
+      !volcanoSky ||
+      !volcanoPage ||
+      !bulletEl ||
+      !toadEl ||
+      !toadSpriteEl ||
+      !toadShadowEl ||
+      !kirbyEl ||
+      !kirbySpriteEl ||
+      !kirbyShadowEl
+    )
+      return;
 
     const CHAR_W = 36;
     const CHAR_H = 45;
@@ -256,6 +443,11 @@ export default function Page() {
     const JUMP_DUR = 720;
     const JUMP_HEIGHT = 84;
     const STAR_POWER_MS = 5500;
+    const VOLCANO_MS = 1_000; // 2 minutes after flag is fully raised
+    const TOAD_RUN_X_RATIO = 0.22;
+    const KIRBY_RUN_X_RATIO = 0.36;
+    const KIRBY_EXIT_DELAY_MS = 700;
+    const BB_SCREEN_X = 48;
 
     let STAGE_W = stage.clientWidth;
     let STAGE_H = stage.clientHeight;
@@ -306,13 +498,84 @@ export default function Page() {
     };
 
     // end-of-level sequence state
+    type Phase =
+      | "approach"
+      | "enter"
+      | "flag"
+      | "done"
+      | "aftermath";
     const ending = {
       active: false,
-      phase: "approach" as "approach" | "enter" | "flag" | "done",
+      phase: "approach" as Phase,
       castleWorldX: 0,
       doorScreenX: 0,
       enterCharIdx: 0,
       flagStart: 0,
+      volcanoStart: 0,
+      volcanoDone: false,
+      castleBroken: false,
+      breakStart: 0,
+    };
+
+    type Runner = {
+      active: boolean;
+      x: number;
+      lastFrame: string;
+      emerged: boolean;
+      startAt: number;
+    };
+    const toad: Runner = {
+      active: false,
+      x: 0,
+      lastFrame: "",
+      emerged: false,
+      startAt: 0,
+    };
+    const kirby: Runner = {
+      active: false,
+      x: 0,
+      lastFrame: "",
+      emerged: false,
+      startAt: 0,
+    };
+    let kirbyCountUpStarted = false;
+
+    const updateRunner = (
+      runner: Runner,
+      el: HTMLDivElement,
+      spriteEl: HTMLDivElement,
+      shadowEl: HTMLDivElement,
+      frames: { A: string; B: string },
+      targetRatio: number,
+      now: number,
+      step: number,
+      framePhase: number,
+    ) => {
+      if (!runner.active) return;
+      const targetX = STAGE_W * targetRatio;
+      if (!runner.emerged) {
+        runner.x += (targetX - runner.x) * 0.04 * step;
+        const emerge = Math.min(1, (now - runner.startAt) / 700);
+        el.style.opacity = String(emerge);
+        if (emerge >= 1 && Math.abs(runner.x - targetX) < 4) {
+          runner.x = targetX;
+          runner.emerged = true;
+        }
+      } else {
+        runner.x = targetX;
+      }
+
+      const frame =
+        Math.floor(now / 120 + framePhase) % 2 ? frames.A : frames.B;
+      if (frame !== runner.lastFrame) {
+        spriteEl.style.boxShadow = frame;
+        runner.lastFrame = frame;
+      }
+
+      const bob = Math.sin(now / 80 + framePhase) * 1.5;
+      el.style.transform = `translate(${runner.x}px, ${bob}px)`;
+      shadowEl.style.transform = `translateX(${runner.x + 2}px)`;
+      shadowEl.style.opacity = String(runner.emerged ? 0.28 : 0.14);
     };
 
     let raf = 0;
@@ -371,8 +634,12 @@ export default function Page() {
         });
       }
 
-      // world scrolls right -> left (until the castle door reaches its stop)
-      if (!ending.active || ending.phase === "approach") {
+      // world scrolls right -> left (until castle stops; resumes in aftermath)
+      if (
+        !ending.active ||
+        ending.phase === "approach" ||
+        ending.phase === "aftermath"
+      ) {
         state.camera += SPEED * step;
       }
 
@@ -506,14 +773,15 @@ export default function Page() {
         }
       });
 
-      // ---- blocks: render + recycle (random re-generation) ----
+      // ---- blocks: render + recycle (only before ending; none for Kirby) ----
+      const blocksLive = !ending.active;
       blocks.forEach((b, idx) => {
         const el = blockRefs.current[idx];
         if (!el) return;
         const sx = b.worldX - state.camera;
 
         // recycle when fully off the left edge -> respawn at a random gap
-        if (!ending.active && sx + BLOCK_W < -30) {
+        if (blocksLive && sx + BLOCK_W < -30) {
           const maxWorldX = Math.max(...blocks.map((o) => o.worldX));
           b.worldX = maxWorldX + randomGap();
           b.hit = false;
@@ -526,7 +794,9 @@ export default function Page() {
 
         el.style.transform = `translateX(${sx}px)`;
         el.style.display =
-          sx > STAGE_W + 80 || sx < -BLOCK_W - 30 ? "none" : "block";
+          !blocksLive || sx > STAGE_W + 80 || sx < -BLOCK_W - 30
+            ? "none"
+            : "block";
       });
 
       // ---- star: pop up, then fly into the character who hit the block ----
@@ -569,15 +839,136 @@ export default function Page() {
 
       // ---- castle + flag ----
       if (ending.active) {
-        castleEl.style.display = "block";
-        castleEl.style.transform = `translateX(${ending.castleWorldX - state.camera}px)`;
+        const castleSx = ending.castleWorldX - state.camera;
+        if (!ending.castleBroken) {
+          castleEl.style.display = "block";
+          castleEl.style.transform = `translateX(${castleSx}px)`;
+        }
         if (ending.phase === "flag" || ending.phase === "done") {
           const p = Math.min(1, (now - ending.flagStart) / 1600);
           flagEl.style.opacity = "1";
           const wave = p >= 1 ? Math.sin(now / 280) * 5 : 0;
           flagEl.style.transform = `translateY(${(1 - p) * 28}px) rotate(${wave}deg)`;
-          if (p >= 1) ending.phase = "done";
+          if (p >= 1) {
+            ending.phase = "done";
+            if (!ending.volcanoStart) ending.volcanoStart = now;
+          }
         }
+
+        // aftermath: castle meets Bullet Bill -> break
+        if (
+          ending.phase === "aftermath" &&
+          !ending.castleBroken &&
+          castleSx <= BB_SCREEN_X + BB_W * 0.35
+        ) {
+          ending.castleBroken = true;
+          ending.breakStart = now;
+          castleEl.classList.add("castle--broken");
+          flagEl.style.opacity = "0";
+        }
+
+        if (ending.castleBroken) {
+          const bp = Math.min(1, (now - ending.breakStart) / 900);
+          castleEl.style.opacity = String(1 - bp);
+          castleEl.style.transform = `translateX(${castleSx}px) translateY(${bp * 28}px) rotate(${bp * 12}deg) scale(${1 - bp * 0.25})`;
+          if (bp >= 1) castleEl.style.display = "none";
+        }
+      }
+
+      // ---- volcano sky: 2 min fade after flag fully raised ----
+      if (ending.volcanoStart && !ending.volcanoDone) {
+        const t = Math.min(1, (now - ending.volcanoStart) / VOLCANO_MS);
+        const e = t * t * (3 - 2 * t); // smoothstep
+        volcanoSky.style.opacity = String(e);
+        volcanoPage.style.opacity = String(e);
+        // scorched ground / grass as eruption builds
+        ground.style.filter = `saturate(${1 - e * 0.55}) brightness(${1 - e * 0.22}) sepia(${e * 0.45}) hue-rotate(${-e * 18}deg)`;
+        decoRefs.current.forEach((el, i) => {
+          if (!el) return;
+          if (DECO[i].kind === "cloud") {
+            el.style.filter = `brightness(${1 - e * 0.45}) sepia(${e * 0.6}) hue-rotate(${-e * 25}deg)`;
+            el.style.opacity = String(0.95 - e * 0.35);
+          } else {
+            el.style.filter = `saturate(${1 - e * 0.5}) brightness(${1 - e * 0.25}) sepia(${e * 0.4})`;
+          }
+        });
+
+        if (t >= 1) {
+          ending.volcanoDone = true;
+          ending.phase = "aftermath";
+
+          // Bullet Bill appears on the left
+          bulletEl.style.display = "block";
+          bulletEl.style.opacity = "0";
+
+          const doorCenter =
+            ending.castleWorldX - state.camera + DOOR_X;
+
+          // Toad emerges first
+          toad.active = true;
+          toad.x = doorCenter - TOAD_W / 2;
+          toad.emerged = false;
+          toad.startAt = now;
+          toadEl.style.display = "block";
+          toadEl.style.opacity = "0";
+          toadShadowEl.style.display = "block";
+
+          // Kirby follows shortly after; timer count-up starts with him
+          kirby.active = true;
+          kirby.x = doorCenter - KIRBY_W / 2;
+          kirby.emerged = false;
+          kirby.startAt = now + KIRBY_EXIT_DELAY_MS;
+          kirbyEl.style.display = "block";
+          kirbyEl.style.opacity = "0";
+          kirbyShadowEl.style.display = "block";
+
+          // no ? blocks / stars in aftermath
+          state.star.active = false;
+          star.style.display = "none";
+          blockRefs.current.forEach((el) => {
+            if (el) el.style.display = "none";
+          });
+        }
+      }
+
+      // ---- Bullet Bill (fixed on the left during aftermath) ----
+      if (ending.phase === "aftermath") {
+        const bob = Math.sin(now / 140) * 3;
+        const fadeIn = Math.min(1, (now - (ending.volcanoStart + VOLCANO_MS)) / 500);
+        bulletEl.style.opacity = String(fadeIn);
+        bulletEl.style.transform = `translate(${BB_SCREEN_X}px, ${bob}px)`;
+      }
+
+      // ---- Toad then Kirby: exit castle and keep running together ----
+      if (toad.active) {
+        updateRunner(
+          toad,
+          toadEl,
+          toadSpriteEl,
+          toadShadowEl,
+          TOAD_FRAMES,
+          TOAD_RUN_X_RATIO,
+          now,
+          step,
+          0,
+        );
+      }
+      if (kirby.active && now >= kirby.startAt) {
+        if (!kirbyCountUpStarted) {
+          kirbyCountUpStarted = true;
+          startCountUpRef.current();
+        }
+        updateRunner(
+          kirby,
+          kirbyEl,
+          kirbySpriteEl,
+          kirbyShadowEl,
+          KIRBY_FRAMES,
+          KIRBY_RUN_X_RATIO,
+          now,
+          step,
+          1.3,
+        );
       }
 
       // ---- ground texture scroll ----
@@ -606,15 +997,20 @@ export default function Page() {
   }, []);
 
   return (
-    <main>
+    <>
+      <div className="page-volcano" ref={volcanoPageRef} aria-hidden />
+      <main>
       <div className="timer">
         <div className="timer__label">
-          {remaining <= 0 ? ENDING_STRING : LOOPING_STRING}
+          {countingUp || remaining <= 0 ? ENDING_STRING : LOOPING_STRING}
         </div>
-        <div className="timer__value">{format(remaining)}</div>
+        <div className="timer__value">{format(timerMs)}</div>
       </div>
 
       <div className="stage" ref={stageRef}>
+        <div className="stage__volcano" ref={volcanoSkyRef} aria-hidden>
+          <div className="stage__ash" />
+        </div>
         {/* decorative scenery */}
         {DECO.map((d, i) => (
           <div
@@ -654,11 +1050,72 @@ export default function Page() {
             spriteRef={charSpriteRefCbs[i]}
           />
         ))}
+        {/* Bullet Bill — appears after volcano transition */}
+        <div
+          className="bullet"
+          ref={bulletRef}
+          style={{ display: "none", opacity: 0 }}
+          aria-hidden
+        >
+          <div
+            style={{
+              width: PIXEL,
+              height: PIXEL,
+              boxShadow: BB_SHADOW,
+            }}
+          />
+        </div>
+        {/* Toad — emerges first after volcano */}
+        <div
+          className="toad__shadow"
+          ref={toadShadowRef}
+          style={{ display: "none" }}
+          aria-hidden
+        />
+        <div
+          className="toad"
+          ref={toadRef}
+          style={{ display: "none", opacity: 0 }}
+        >
+          <div className="char__name">Toad</div>
+          <div
+            ref={toadSpriteRef}
+            style={{
+              width: PIXEL,
+              height: PIXEL,
+              boxShadow: TOAD_FRAMES.A,
+            }}
+          />
+        </div>
+        {/* Kirby — emerges after Toad */}
+        <div
+          className="kirby__shadow"
+          ref={kirbyShadowRef}
+          style={{ display: "none" }}
+          aria-hidden
+        />
+        <div
+          className="kirby"
+          ref={kirbyRef}
+          style={{ display: "none", opacity: 0 }}
+        >
+          <div className="char__name">Kirby</div>
+          <div
+            ref={kirbySpriteRef}
+            style={{
+              width: PIXEL,
+              height: PIXEL,
+              boxShadow: KIRBY_FRAMES.A,
+            }}
+          />
+        </div>
         {/* end-of-level castle (painted above the characters) */}
         <div className="castle" ref={castleRef}>
           <div className="castle__pole" />
           <div className="castle__flag" ref={flagRef} />
+          <div className="castle__rubble" aria-hidden />
           <div
+            className="castle__sprite"
             style={{
               width: CASTLE_PIXEL,
               height: CASTLE_PIXEL,
@@ -668,5 +1125,6 @@ export default function Page() {
         </div>
       </div>
     </main>
+    </>
   );
 }
