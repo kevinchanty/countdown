@@ -10,7 +10,7 @@ import {
 const LOOPING_STRING = "FISH, JASON ARE FREE!!!XDDDDD";
 const ENDING_STRING = "Congratulations!!!!!! You made it!";
 // Change this variable to set when the countdown ends.
-const COUNTDOWN_END = new Date("2026-08-31T18:05:00");
+const COUNTDOWN_END = new Date("2026-08-04T22:30:00");
 
 /* ---------- Pixel characters (via box-shadow) ---------- */
 const PIXEL = 3;
@@ -443,7 +443,7 @@ export default function Page() {
     const JUMP_DUR = 720;
     const JUMP_HEIGHT = 84;
     const STAR_POWER_MS = 5500;
-    const VOLCANO_MS = 1_000; // 2 minutes after flag is fully raised
+    const VOLCANO_MS = 120_000; // 120 s after flag is fully raised
     const TOAD_RUN_X_RATIO = 0.22;
     const KIRBY_RUN_X_RATIO = 0.36;
     const KIRBY_EXIT_DELAY_MS = 700;
