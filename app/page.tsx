@@ -1,16 +1,11 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  type MutableRefObject,
-} from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 
 const LOOPING_STRING = "FISH, JASON ARE FREE!!!XDDDDD";
 const ENDING_STRING = "Congratulations!!!!!! You made it!";
 // Change this variable to set when the countdown ends.
-const COUNTDOWN_END = new Date("2026-08-04T22:30:00");
+const COUNTDOWN_END = new Date("2026-08-31T18:05:00");
 
 /* ---------- Pixel characters (via box-shadow) ---------- */
 const PIXEL = 3;
@@ -42,11 +37,7 @@ const LEGS_RUN_A = ["..OO....OO..", "..HH....HH..", ".HHH....HHH."];
 const LEGS_RUN_B = ["..OOO..OOO..", "...HH..HH...", "..HHH..HHH.."];
 const LEGS_JUMP = [".OOO....OOO.", "..HH....HH..", ".HHH....HHH."];
 
-function buildShadow(
-  rows: string[],
-  colors: Record<string, string>,
-  px: number,
-): string {
+function buildShadow(rows: string[], colors: Record<string, string>, px: number): string {
   const shadows: string[] = [];
   rows.forEach((row, r) => {
     for (let c = 0; c < row.length; c++) {
@@ -169,7 +160,7 @@ const KIRBY_BODY = [
   "BLLDLLLLBLLLLLB.",
   "BLLDLLLLBLLLLB..",
   ".BLLLLLLLLLLBB..",
-  "..BBLLLLLLLBB...",    
+  "..BBLLLLLLLBB...",
 ];
 
 const KIRBY_WALK_A_FEET = [
@@ -223,7 +214,7 @@ const TOAD_MAP = [
   "..KWWWWWWWWWK...",
   "...KNNNKNNNK....",
   "..KNNNNKNNNNK...",
-  "...KKKKKKKKK....",  
+  "...KKKKKKKKK....",
 ];
 
 // slight foot shift for walk cycle
@@ -245,7 +236,7 @@ const TOAD_MAP_B = [
   "..KWWWWWWWWWK...",
   ".KNNNK....KNNK..",
   "KNNNNK...KNNNNK.",
-  ".KKKK.....KKKK..",  
+  ".KKKK.....KKKK..",
 ];
 
 const TOAD_FRAMES = {
@@ -268,10 +259,7 @@ function Character({
   return (
     <div ref={charRef} className="mario">
       <div className="char__name">{name}</div>
-      <div
-        ref={spriteRef}
-        style={{ width: PIXEL, height: PIXEL, boxShadow: initialFrame }}
-      />
+      <div ref={spriteRef} style={{ width: PIXEL, height: PIXEL, boxShadow: initialFrame }} />
     </div>
   );
 }
@@ -332,10 +320,7 @@ type Star = {
 };
 
 /* ---------- Page ---------- */
-function bindRef(
-  refs: MutableRefObject<(HTMLDivElement | null)[]>,
-  i: number,
-) {
+function bindRef(refs: MutableRefObject<(HTMLDivElement | null)[]>, i: number) {
   return (el: HTMLDivElement | null) => {
     refs.current[i] = el;
   };
@@ -389,18 +374,10 @@ export default function Page() {
   const decoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const decoRefCbs = useRef(DECO.map((_, i) => bindRef(decoRefs, i))).current;
-  const blockRefCbs = useRef(
-    Array.from({ length: BLOCK_COUNT }, (_, i) => bindRef(blockRefs, i)),
-  ).current;
-  const charShadowRefCbs = useRef(
-    CHARACTERS.map((_, i) => bindRef(charShadowRefs, i)),
-  ).current;
-  const charRefCbs = useRef(
-    CHARACTERS.map((_, i) => bindRef(charRefs, i)),
-  ).current;
-  const charSpriteRefCbs = useRef(
-    CHARACTERS.map((_, i) => bindRef(charSpriteRefs, i)),
-  ).current;
+  const blockRefCbs = useRef(Array.from({ length: BLOCK_COUNT }, (_, i) => bindRef(blockRefs, i))).current;
+  const charShadowRefCbs = useRef(CHARACTERS.map((_, i) => bindRef(charShadowRefs, i))).current;
+  const charRefCbs = useRef(CHARACTERS.map((_, i) => bindRef(charRefs, i))).current;
+  const charSpriteRefCbs = useRef(CHARACTERS.map((_, i) => bindRef(charSpriteRefs, i))).current;
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -498,12 +475,7 @@ export default function Page() {
     };
 
     // end-of-level sequence state
-    type Phase =
-      | "approach"
-      | "enter"
-      | "flag"
-      | "done"
-      | "aftermath";
+    type Phase = "approach" | "enter" | "flag" | "done" | "aftermath";
     const ending = {
       active: false,
       phase: "approach" as Phase,
@@ -565,8 +537,7 @@ export default function Page() {
         runner.x = targetX;
       }
 
-      const frame =
-        Math.floor(now / 120 + framePhase) % 2 ? frames.A : frames.B;
+      const frame = Math.floor(now / 120 + framePhase) % 2 ? frames.A : frames.B;
       if (frame !== runner.lastFrame) {
         spriteEl.style.boxShadow = frame;
         runner.lastFrame = frame;
@@ -635,11 +606,7 @@ export default function Page() {
       }
 
       // world scrolls right -> left (until castle stops; resumes in aftermath)
-      if (
-        !ending.active ||
-        ending.phase === "approach" ||
-        ending.phase === "aftermath"
-      ) {
+      if (!ending.active || ending.phase === "approach" || ending.phase === "aftermath") {
         state.camera += SPEED * step;
       }
 
@@ -660,11 +627,7 @@ export default function Page() {
         if (!charEl || !spriteEl || !shadowEl) return;
 
         // ending: walk toward the castle door, one character at a time
-        if (
-          ending.active &&
-          ending.phase === "enter" &&
-          i === ending.enterCharIdx
-        ) {
+        if (ending.active && ending.phase === "enter" && i === ending.enterCharIdx) {
           ch.x += 1.7 * step;
           if (!ch.inside && ch.x + CHAR_W / 2 >= ending.doorScreenX) {
             ch.inside = true;
@@ -704,11 +667,7 @@ export default function Page() {
 
         // animation frames
         const frames = CHARACTERS[i].frames;
-        const frame = ch.jumping
-          ? frames.JUMP
-          : Math.floor(now / 130 + ch.framePhase) % 2
-            ? frames.A
-            : frames.B;
+        const frame = ch.jumping ? frames.JUMP : Math.floor(now / 130 + ch.framePhase) % 2 ? frames.A : frames.B;
         if (frame !== ch.lastFrame) {
           spriteEl.style.boxShadow = frame;
           ch.lastFrame = frame;
@@ -727,8 +686,7 @@ export default function Page() {
         const bob = ch.jumping ? 0 : Math.sin(now / 80 + ch.bobPhase) * 1.5;
         charEl.style.transform = `translate(${ch.x}px, ${jumpY + bob}px)`;
         const heightAboveGround = Math.max(0, -jumpY);
-        const shadowScale =
-          1 - Math.min(heightAboveGround / (JUMP_HEIGHT * 1.4), 0.45);
+        const shadowScale = 1 - Math.min(heightAboveGround / (JUMP_HEIGHT * 1.4), 0.45);
         shadowEl.style.transform = `translateX(${ch.x - 2}px) scale(${shadowScale})`;
         shadowEl.style.opacity = String(0.28 - heightAboveGround * 0.0015);
 
@@ -793,10 +751,7 @@ export default function Page() {
         }
 
         el.style.transform = `translateX(${sx}px)`;
-        el.style.display =
-          !blocksLive || sx > STAGE_W + 80 || sx < -BLOCK_W - 30
-            ? "none"
-            : "block";
+        el.style.display = !blocksLive || sx > STAGE_W + 80 || sx < -BLOCK_W - 30 ? "none" : "block";
       });
 
       // ---- star: pop up, then fly into the character who hit the block ----
@@ -856,11 +811,7 @@ export default function Page() {
         }
 
         // aftermath: castle meets Bullet Bill -> break
-        if (
-          ending.phase === "aftermath" &&
-          !ending.castleBroken &&
-          castleSx <= BB_SCREEN_X + BB_W * 0.35
-        ) {
+        if (ending.phase === "aftermath" && !ending.castleBroken && castleSx <= BB_SCREEN_X + BB_W * 0.35) {
           ending.castleBroken = true;
           ending.breakStart = now;
           castleEl.classList.add("castle--broken");
@@ -901,8 +852,7 @@ export default function Page() {
           bulletEl.style.display = "block";
           bulletEl.style.opacity = "0";
 
-          const doorCenter =
-            ending.castleWorldX - state.camera + DOOR_X;
+          const doorCenter = ending.castleWorldX - state.camera + DOOR_X;
 
           // Toad emerges first
           toad.active = true;
@@ -941,34 +891,14 @@ export default function Page() {
 
       // ---- Toad then Kirby: exit castle and keep running together ----
       if (toad.active) {
-        updateRunner(
-          toad,
-          toadEl,
-          toadSpriteEl,
-          toadShadowEl,
-          TOAD_FRAMES,
-          TOAD_RUN_X_RATIO,
-          now,
-          step,
-          0,
-        );
+        updateRunner(toad, toadEl, toadSpriteEl, toadShadowEl, TOAD_FRAMES, TOAD_RUN_X_RATIO, now, step, 0);
       }
       if (kirby.active && now >= kirby.startAt) {
         if (!kirbyCountUpStarted) {
           kirbyCountUpStarted = true;
           startCountUpRef.current();
         }
-        updateRunner(
-          kirby,
-          kirbyEl,
-          kirbySpriteEl,
-          kirbyShadowEl,
-          KIRBY_FRAMES,
-          KIRBY_RUN_X_RATIO,
-          now,
-          step,
-          1.3,
-        );
+        updateRunner(kirby, kirbyEl, kirbySpriteEl, kirbyShadowEl, KIRBY_FRAMES, KIRBY_RUN_X_RATIO, now, step, 1.3);
       }
 
       // ---- ground texture scroll ----
@@ -1000,131 +930,98 @@ export default function Page() {
     <>
       <div className="page-volcano" ref={volcanoPageRef} aria-hidden />
       <main>
-      <div className="timer">
-        <div className="timer__label">
-          {countingUp || remaining <= 0 ? ENDING_STRING : LOOPING_STRING}
+        <div className="timer">
+          <div className="timer__label">{countingUp || remaining <= 0 ? ENDING_STRING : LOOPING_STRING}</div>
+          <div className="timer__value">{format(timerMs)}</div>
         </div>
-        <div className="timer__value">{format(timerMs)}</div>
-      </div>
 
-      <div className="stage" ref={stageRef}>
-        <div className="stage__volcano" ref={volcanoSkyRef} aria-hidden>
-          <div className="stage__ash" />
-        </div>
-        {/* decorative scenery */}
-        {DECO.map((d, i) => (
-          <div
-            key={i}
-            className={`deco deco--${d.kind}`}
-            style={d.top ? { top: d.top } : undefined}
-            ref={decoRefCbs[i]}
-          />
-        ))}
-        <div className="ground" ref={groundRef} />
-        {/* blocks */}
-        {Array.from({ length: BLOCK_COUNT }).map((_, i) => (
-          <div key={i} className="block" ref={blockRefCbs[i]}>
-            <div className="block__box" />
+        <div className="stage" ref={stageRef}>
+          <div className="stage__volcano" ref={volcanoSkyRef} aria-hidden>
+            <div className="stage__ash" />
           </div>
-        ))}
-        <div
-          className="star"
-          ref={starRef}
-          style={{ left: 0, bottom: 0, display: "none" }}
-        >
-          <span className="star__sprite">&#11088;</span>
+          {/* decorative scenery */}
+          {DECO.map((d, i) => (
+            <div
+              key={i}
+              className={`deco deco--${d.kind}`}
+              style={d.top ? { top: d.top } : undefined}
+              ref={decoRefCbs[i]}
+            />
+          ))}
+          <div className="ground" ref={groundRef} />
+          {/* blocks */}
+          {Array.from({ length: BLOCK_COUNT }).map((_, i) => (
+            <div key={i} className="block" ref={blockRefCbs[i]}>
+              <div className="block__box" />
+            </div>
+          ))}
+          <div className="star" ref={starRef} style={{ left: 0, bottom: 0, display: "none" }}>
+            <span className="star__sprite">&#11088;</span>
+          </div>
+          {CHARACTERS.map((c, i) => (
+            <div key={`shadow-${i}`} className="mario__shadow" ref={charShadowRefCbs[i]} />
+          ))}
+          {CHARACTERS.map((c, i) => (
+            <Character
+              key={c.name}
+              name={c.name}
+              initialFrame={c.frames.A}
+              charRef={charRefCbs[i]}
+              spriteRef={charSpriteRefCbs[i]}
+            />
+          ))}
+          {/* Bullet Bill — appears after volcano transition */}
+          <div className="bullet" ref={bulletRef} style={{ display: "none", opacity: 0 }} aria-hidden>
+            <div
+              style={{
+                width: PIXEL,
+                height: PIXEL,
+                boxShadow: BB_SHADOW,
+              }}
+            />
+          </div>
+          {/* Toad — emerges first after volcano */}
+          <div className="toad__shadow" ref={toadShadowRef} style={{ display: "none" }} aria-hidden />
+          <div className="toad" ref={toadRef} style={{ display: "none", opacity: 0 }}>
+            <div className="char__name">Toad</div>
+            <div
+              ref={toadSpriteRef}
+              style={{
+                width: PIXEL,
+                height: PIXEL,
+                boxShadow: TOAD_FRAMES.A,
+              }}
+            />
+          </div>
+          {/* Kirby — emerges after Toad */}
+          <div className="kirby__shadow" ref={kirbyShadowRef} style={{ display: "none" }} aria-hidden />
+          <div className="kirby" ref={kirbyRef} style={{ display: "none", opacity: 0 }}>
+            <div className="char__name">Kirby</div>
+            <div
+              ref={kirbySpriteRef}
+              style={{
+                width: PIXEL,
+                height: PIXEL,
+                boxShadow: KIRBY_FRAMES.A,
+              }}
+            />
+          </div>
+          {/* end-of-level castle (painted above the characters) */}
+          <div className="castle" ref={castleRef}>
+            <div className="castle__pole" />
+            <div className="castle__flag" ref={flagRef} />
+            <div className="castle__rubble" aria-hidden />
+            <div
+              className="castle__sprite"
+              style={{
+                width: CASTLE_PIXEL,
+                height: CASTLE_PIXEL,
+                boxShadow: CASTLE_SHADOW,
+              }}
+            />
+          </div>
         </div>
-        {CHARACTERS.map((c, i) => (
-          <div
-            key={`shadow-${i}`}
-            className="mario__shadow"
-            ref={charShadowRefCbs[i]}
-          />
-        ))}
-        {CHARACTERS.map((c, i) => (
-          <Character
-            key={c.name}
-            name={c.name}
-            initialFrame={c.frames.A}
-            charRef={charRefCbs[i]}
-            spriteRef={charSpriteRefCbs[i]}
-          />
-        ))}
-        {/* Bullet Bill — appears after volcano transition */}
-        <div
-          className="bullet"
-          ref={bulletRef}
-          style={{ display: "none", opacity: 0 }}
-          aria-hidden
-        >
-          <div
-            style={{
-              width: PIXEL,
-              height: PIXEL,
-              boxShadow: BB_SHADOW,
-            }}
-          />
-        </div>
-        {/* Toad — emerges first after volcano */}
-        <div
-          className="toad__shadow"
-          ref={toadShadowRef}
-          style={{ display: "none" }}
-          aria-hidden
-        />
-        <div
-          className="toad"
-          ref={toadRef}
-          style={{ display: "none", opacity: 0 }}
-        >
-          <div className="char__name">Toad</div>
-          <div
-            ref={toadSpriteRef}
-            style={{
-              width: PIXEL,
-              height: PIXEL,
-              boxShadow: TOAD_FRAMES.A,
-            }}
-          />
-        </div>
-        {/* Kirby — emerges after Toad */}
-        <div
-          className="kirby__shadow"
-          ref={kirbyShadowRef}
-          style={{ display: "none" }}
-          aria-hidden
-        />
-        <div
-          className="kirby"
-          ref={kirbyRef}
-          style={{ display: "none", opacity: 0 }}
-        >
-          <div className="char__name">Kirby</div>
-          <div
-            ref={kirbySpriteRef}
-            style={{
-              width: PIXEL,
-              height: PIXEL,
-              boxShadow: KIRBY_FRAMES.A,
-            }}
-          />
-        </div>
-        {/* end-of-level castle (painted above the characters) */}
-        <div className="castle" ref={castleRef}>
-          <div className="castle__pole" />
-          <div className="castle__flag" ref={flagRef} />
-          <div className="castle__rubble" aria-hidden />
-          <div
-            className="castle__sprite"
-            style={{
-              width: CASTLE_PIXEL,
-              height: CASTLE_PIXEL,
-              boxShadow: CASTLE_SHADOW,
-            }}
-          />
-        </div>
-      </div>
-    </main>
+      </main>
     </>
   );
 }
