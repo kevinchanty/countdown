@@ -505,7 +505,7 @@ export default function Page() {
     const JUMP_DUR = 720;
     const JUMP_HEIGHT = 84;
     const STAR_POWER_MS = 5500;
-    const VOLCANO_MS = 1_000; // 120 s after flag is fully raised
+    const VOLCANO_MS = 120_000; // 120 s after flag is fully raised
     const PENGUIN_RUN_X_RATIO = 0.16;
     const TOAD_RUN_X_RATIO = 0.24;
     const BIGPEN_RUN_X_RATIO = 0.32;
