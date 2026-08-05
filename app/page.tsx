@@ -266,7 +266,9 @@ function Character({
 
 /* ---------- Timer ---------- */
 function useCountdown(end: Date) {
-  const [remaining, setRemaining] = useState(0);
+  const [remaining, setRemaining] = useState(() =>
+    Math.max(0, end.getTime() - Date.now()),
+  );
   useEffect(() => {
     const tick = () => setRemaining(Math.max(0, end.getTime() - Date.now()));
     tick();
