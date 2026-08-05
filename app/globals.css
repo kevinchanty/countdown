@@ -191,14 +191,8 @@ main {
 .stage > .star,
 .stage > .mario__shadow,
 .stage > .mario,
-.stage > .kirby,
-.stage > .kirby__shadow,
-.stage > .toad,
-.stage > .toad__shadow,
-.stage > .penguin,
-.stage > .penguin__shadow,
-.stage > .bigPen,
-.stage > .bigPen__shadow,
+.stage > .runner,
+.stage > .runner__shadow,
 .stage > .bullet,
 .stage > .castle {
   z-index: 1;
@@ -396,8 +390,8 @@ main {
   filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.35));
 }
 
-/* ---- Penguin ---- */
-.penguin {
+/* ---- Aftermath runners (Penguin, Toad, BigPen, Kirby) ---- */
+.runner {
   position: absolute;
   left: 0;
   bottom: 38%;
@@ -405,67 +399,7 @@ main {
   height: 48px;
   will-change: transform, opacity;
 }
-.penguin__shadow {
-  position: absolute;
-  left: 0;
-  bottom: calc(38% - 8px);
-  width: 40px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-/* ---- Toad ---- */
-.toad {
-  position: absolute;
-  left: 0;
-  bottom: 38%;
-  width: 48px;
-  height: 48px;
-  will-change: transform, opacity;
-}
-.toad__shadow {
-  position: absolute;
-  left: 0;
-  bottom: calc(38% - 8px);
-  width: 40px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-/* ---- BigPen ---- */
-.bigPen {
-  position: absolute;
-  left: 0;
-  bottom: 38%;
-  width: 48px;
-  height: 48px;
-  will-change: transform, opacity;
-}
-.bigPen__shadow {
-  position: absolute;
-  left: 0;
-  bottom: calc(38% - 8px);
-  width: 40px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-/* ---- Kirby ---- */
-.kirby {
-  position: absolute;
-  left: 0;
-  bottom: 38%;
-  width: 48px;
-  height: 48px;
-  will-change: transform, opacity;
-}
-.kirby__shadow {
+.runner__shadow {
   position: absolute;
   left: 0;
   bottom: calc(38% - 8px);
