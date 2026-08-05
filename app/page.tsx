@@ -185,6 +185,55 @@ const KIRBY_FRAMES = {
 };
 const KIRBY_W = 16 * PIXEL;
 
+/* ---------- Penguin (16px wide, legs included) ---------- */
+const PENGUIN_COLORS: Record<string, string> = {
+  ".": "transparent",
+  K: "#000000",
+  B: "#1a1a2e",
+  W: "#ffffff",
+  O: "#ff8c00",
+  G: "#A5AAAE",
+};
+
+const PENGUIN_MAP = [
+  "........KKKK....",
+  ".......KWWWKK...",
+  ".......KWWKWKO..",
+  ".......KKWWWK...",
+  ".......KKKKK....",
+  "......KKKGGG....",
+  "......KKKKGGG...",
+  ".....KKKKKGGG...",
+  "...KKKKKKKGGG...",
+  "....KKKKKGGGG...",
+  ".....KKGGGGGG...",
+  "....KKGGGGGG....",
+  ".....KKGGOOOO...",  
+];
+
+const PENGUIN_MAP_B = [
+  "........KKKK....",
+  ".......KWWWKK...",
+  ".......KWWKWKO..",
+  ".......KKWWWK...",
+  ".......KKKKK....",
+  "......KKKGGG....",
+  "......KKKKGGG...",
+  ".....KKKKKGGG...",
+  "...KKKKKKKGGG...",
+  "....KKKKKGGGG...",
+  ".....KKGGGGGG...",
+  "....KKGGGGGG....",
+  "...KKGGOOOO.....",
+  "................",
+];
+
+const PENGUIN_FRAMES = {
+  A: buildShadow(PENGUIN_MAP, PENGUIN_COLORS, PIXEL),
+  B: buildShadow(PENGUIN_MAP_B, PENGUIN_COLORS, PIXEL),
+};
+const PENGUIN_W = 16 * PIXEL;
+
 /* ---------- Toad (16px wide, legs included) ---------- */
 const TOAD_COLORS: Record<string, string> = {
   ".": "transparent",
@@ -244,6 +293,22 @@ const TOAD_FRAMES = {
   B: buildShadow(TOAD_MAP_B, TOAD_COLORS, PIXEL),
 };
 const TOAD_W = 16 * PIXEL;
+
+/* ---------- BigPen (penguin model, white belly) ---------- */
+const BIGPENGUIN_COLORS: Record<string, string> = {
+  ".": "transparent",
+  K: "#000000",
+  B: "#1a1a2e",
+  W: "#ffffff",
+  O: "#ff8c00",
+  G: "#ffffff",
+};
+
+const BIGPEN_FRAMES = {
+  A: buildShadow(PENGUIN_MAP, BIGPENGUIN_COLORS, PIXEL),
+  B: buildShadow(PENGUIN_MAP_B, BIGPENGUIN_COLORS, PIXEL),
+};
+const BIGPEN_W = 16 * PIXEL;
 
 function Character({
   name,
@@ -363,9 +428,15 @@ export default function Page() {
   const volcanoSkyRef = useRef<HTMLDivElement>(null);
   const volcanoPageRef = useRef<HTMLDivElement>(null);
   const bulletRef = useRef<HTMLDivElement>(null);
+  const penguinRef = useRef<HTMLDivElement>(null);
+  const penguinSpriteRef = useRef<HTMLDivElement>(null);
+  const penguinShadowRef = useRef<HTMLDivElement>(null);
   const toadRef = useRef<HTMLDivElement>(null);
   const toadSpriteRef = useRef<HTMLDivElement>(null);
   const toadShadowRef = useRef<HTMLDivElement>(null);
+  const bigPenRef = useRef<HTMLDivElement>(null);
+  const bigPenSpriteRef = useRef<HTMLDivElement>(null);
+  const bigPenShadowRef = useRef<HTMLDivElement>(null);
   const kirbyRef = useRef<HTMLDivElement>(null);
   const kirbySpriteRef = useRef<HTMLDivElement>(null);
   const kirbyShadowRef = useRef<HTMLDivElement>(null);
@@ -390,9 +461,15 @@ export default function Page() {
     const volcanoSky = volcanoSkyRef.current;
     const volcanoPage = volcanoPageRef.current;
     const bulletEl = bulletRef.current;
+    const penguinEl = penguinRef.current;
+    const penguinSpriteEl = penguinSpriteRef.current;
+    const penguinShadowEl = penguinShadowRef.current;
     const toadEl = toadRef.current;
     const toadSpriteEl = toadSpriteRef.current;
     const toadShadowEl = toadShadowRef.current;
+    const bigPenEl = bigPenRef.current;
+    const bigPenSpriteEl = bigPenSpriteRef.current;
+    const bigPenShadowEl = bigPenShadowRef.current;
     const kirbyEl = kirbyRef.current;
     const kirbySpriteEl = kirbySpriteRef.current;
     const kirbyShadowEl = kirbyShadowRef.current;
@@ -405,9 +482,15 @@ export default function Page() {
       !volcanoSky ||
       !volcanoPage ||
       !bulletEl ||
+      !penguinEl ||
+      !penguinSpriteEl ||
+      !penguinShadowEl ||
       !toadEl ||
       !toadSpriteEl ||
       !toadShadowEl ||
+      !bigPenEl ||
+      !bigPenSpriteEl ||
+      !bigPenShadowEl ||
       !kirbyEl ||
       !kirbySpriteEl ||
       !kirbyShadowEl
@@ -422,10 +505,14 @@ export default function Page() {
     const JUMP_DUR = 720;
     const JUMP_HEIGHT = 84;
     const STAR_POWER_MS = 5500;
-    const VOLCANO_MS = 120_000; // 120 s after flag is fully raised
-    const TOAD_RUN_X_RATIO = 0.22;
-    const KIRBY_RUN_X_RATIO = 0.36;
-    const KIRBY_EXIT_DELAY_MS = 700;
+    const VOLCANO_MS = 1_000; // 120 s after flag is fully raised
+    const PENGUIN_RUN_X_RATIO = 0.16;
+    const TOAD_RUN_X_RATIO = 0.24;
+    const BIGPEN_RUN_X_RATIO = 0.32;
+    const KIRBY_RUN_X_RATIO = 0.4;
+    const TOAD_EXIT_DELAY_MS = 700;
+    const BIGPEN_EXIT_DELAY_MS = 1400;
+    const KIRBY_EXIT_DELAY_MS = 2100;
     const BB_SCREEN_X = 48;
 
     let STAGE_W = stage.clientWidth;
@@ -498,7 +585,21 @@ export default function Page() {
       emerged: boolean;
       startAt: number;
     };
+    const penguin: Runner = {
+      active: false,
+      x: 0,
+      lastFrame: "",
+      emerged: false,
+      startAt: 0,
+    };
     const toad: Runner = {
+      active: false,
+      x: 0,
+      lastFrame: "",
+      emerged: false,
+      startAt: 0,
+    };
+    const bigPen: Runner = {
       active: false,
       x: 0,
       lastFrame: "",
@@ -519,7 +620,7 @@ export default function Page() {
       el: HTMLDivElement,
       spriteEl: HTMLDivElement,
       shadowEl: HTMLDivElement,
-      frames: { A: string; B: string },
+      frames: string[] | { A: string; B: string },
       targetRatio: number,
       now: number,
       step: number,
@@ -539,7 +640,8 @@ export default function Page() {
         runner.x = targetX;
       }
 
-      const frame = Math.floor(now / 120 + framePhase) % 2 ? frames.A : frames.B;
+      const frameList = Array.isArray(frames) ? frames : [frames.A, frames.B];
+      const frame = frameList[Math.floor(now / 120 + framePhase) % frameList.length];
       if (frame !== runner.lastFrame) {
         spriteEl.style.boxShadow = frame;
         runner.lastFrame = frame;
@@ -856,14 +958,32 @@ export default function Page() {
 
           const doorCenter = ending.castleWorldX - state.camera + DOOR_X;
 
-          // Toad emerges first
+          // Penguin emerges first
+          penguin.active = true;
+          penguin.x = doorCenter - PENGUIN_W / 2;
+          penguin.emerged = false;
+          penguin.startAt = now;
+          penguinEl.style.display = "block";
+          penguinEl.style.opacity = "0";
+          penguinShadowEl.style.display = "block";
+
+          // Toad follows Penguin
           toad.active = true;
           toad.x = doorCenter - TOAD_W / 2;
           toad.emerged = false;
-          toad.startAt = now;
+          toad.startAt = now + TOAD_EXIT_DELAY_MS;
           toadEl.style.display = "block";
           toadEl.style.opacity = "0";
           toadShadowEl.style.display = "block";
+
+          // BigPen follows Toad
+          bigPen.active = true;
+          bigPen.x = doorCenter - BIGPEN_W / 2;
+          bigPen.emerged = false;
+          bigPen.startAt = now + BIGPEN_EXIT_DELAY_MS;
+          bigPenEl.style.display = "block";
+          bigPenEl.style.opacity = "0";
+          bigPenShadowEl.style.display = "block";
 
           // Kirby follows shortly after; timer count-up starts with him
           kirby.active = true;
@@ -891,9 +1011,15 @@ export default function Page() {
         bulletEl.style.transform = `translate(${BB_SCREEN_X}px, ${bob}px)`;
       }
 
-      // ---- Toad then Kirby: exit castle and keep running together ----
-      if (toad.active) {
-        updateRunner(toad, toadEl, toadSpriteEl, toadShadowEl, TOAD_FRAMES, TOAD_RUN_X_RATIO, now, step, 0);
+      // ---- Penguin, Toad, BigPen, then Kirby: exit castle and keep running together ----
+      if (penguin.active && now >= penguin.startAt) {
+        updateRunner(penguin, penguinEl, penguinSpriteEl, penguinShadowEl, PENGUIN_FRAMES, PENGUIN_RUN_X_RATIO, now, step, 0);
+      }
+      if (toad.active && now >= toad.startAt) {
+        updateRunner(toad, toadEl, toadSpriteEl, toadShadowEl, TOAD_FRAMES, TOAD_RUN_X_RATIO, now, step, 0.4);
+      }
+      if (bigPen.active && now >= bigPen.startAt) {
+        updateRunner(bigPen, bigPenEl, bigPenSpriteEl, bigPenShadowEl, BIGPEN_FRAMES, BIGPEN_RUN_X_RATIO, now, step, 0.7);
       }
       if (kirby.active && now >= kirby.startAt) {
         if (!kirbyCountUpStarted) {
@@ -982,7 +1108,20 @@ export default function Page() {
               }}
             />
           </div>
-          {/* Toad — emerges first after volcano */}
+          {/* Penguin — emerges first after volcano */}
+          <div className="penguin__shadow" ref={penguinShadowRef} style={{ display: "none" }} aria-hidden />
+          <div className="penguin" ref={penguinRef} style={{ display: "none", opacity: 0 }}>
+            <div className="char__name">Penguin</div>
+            <div
+              ref={penguinSpriteRef}
+              style={{
+                width: PIXEL,
+                height: PIXEL,
+                boxShadow: PENGUIN_FRAMES.A,
+              }}
+            />
+          </div>
+          {/* Toad — emerges after Penguin */}
           <div className="toad__shadow" ref={toadShadowRef} style={{ display: "none" }} aria-hidden />
           <div className="toad" ref={toadRef} style={{ display: "none", opacity: 0 }}>
             <div className="char__name">Toad</div>
@@ -995,7 +1134,20 @@ export default function Page() {
               }}
             />
           </div>
-          {/* Kirby — emerges after Toad */}
+          {/* BigPen — emerges after Toad */}
+          <div className="bigPen__shadow" ref={bigPenShadowRef} style={{ display: "none" }} aria-hidden />
+          <div className="bigPen" ref={bigPenRef} style={{ display: "none", opacity: 0 }}>
+            <div className="char__name">BigPen</div>
+            <div
+              ref={bigPenSpriteRef}
+              style={{
+                width: PIXEL,
+                height: PIXEL,
+                boxShadow: BIGPEN_FRAMES.A,
+              }}
+            />
+          </div>
+          {/* Kirby — emerges after BigPen */}
           <div className="kirby__shadow" ref={kirbyShadowRef} style={{ display: "none" }} aria-hidden />
           <div className="kirby" ref={kirbyRef} style={{ display: "none", opacity: 0 }}>
             <div className="char__name">Kirby</div>
