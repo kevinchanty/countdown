@@ -2,6 +2,10 @@ import type { JumpFrames, WalkFrames } from "./pixel";
 
 export type BlockState = { worldX: number; hit: boolean; jumper: number };
 
+export type HoleState = { worldX: number };
+
+export type DeathKind = "bounce" | "pit";
+
 export type Star = {
   x: number;
   y: number;
@@ -18,6 +22,15 @@ export type RunnerState = {
   lastFrame: string;
   emerged: boolean;
   startAt: number;
+  facing: 1 | -1;
+  jumping: boolean;
+  jumpStart: number;
+  dead: boolean;
+  deathKind: DeathKind;
+  deathStart: number;
+  deathY: number;
+  deathVy: number;
+  respawnAt: number;
 };
 
 export enum EndingPhase {
@@ -51,5 +64,20 @@ export type DecoConfig = {
 };
 
 export function makeRunner(): RunnerState {
-  return { active: false, x: 0, lastFrame: "", emerged: false, startAt: 0 };
+  return {
+    active: false,
+    x: 0,
+    lastFrame: "",
+    emerged: false,
+    startAt: 0,
+    facing: 1,
+    jumping: false,
+    jumpStart: 0,
+    dead: false,
+    deathKind: "bounce",
+    deathStart: 0,
+    deathY: 0,
+    deathVy: 0,
+    respawnAt: 0,
+  };
 }

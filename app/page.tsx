@@ -5,7 +5,7 @@ import { Stage } from "@/components/Stage";
 import { Timer } from "@/components/Timer";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useGameLoop } from "@/hooks/useGameLoop";
-import { BLOCK_COUNT, COUNTDOWN_END, DECO } from "@/lib/constants";
+import { BLOCK_COUNT, COUNTDOWN_END, DECO, HOLE_COUNT } from "@/lib/constants";
 import { makeRefCbs } from "@/lib/refs";
 import { CHARACTERS } from "@/lib/sprites/mario";
 import { RUNNERS } from "@/lib/sprites/runners";
@@ -52,10 +52,12 @@ export default function Page() {
   const charSpriteRefs = useRef<(HTMLDivElement | null)[]>([]);
   const charShadowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const holeRefs = useRef<(HTMLDivElement | null)[]>([]);
   const decoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const decoRefCbs = useRef(makeRefCbs(DECO.length, decoRefs)).current;
   const blockRefCbs = useRef(makeRefCbs(BLOCK_COUNT, blockRefs)).current;
+  const holeRefCbs = useRef(makeRefCbs(HOLE_COUNT, holeRefs)).current;
   const charShadowRefCbs = useRef(makeRefCbs(CHARACTERS.length, charShadowRefs)).current;
   const charRefCbs = useRef(makeRefCbs(CHARACTERS.length, charRefs)).current;
   const charSpriteRefCbs = useRef(makeRefCbs(CHARACTERS.length, charSpriteRefs)).current;
@@ -79,6 +81,7 @@ export default function Page() {
     charSpriteRefs,
     charShadowRefs,
     blockRefs,
+    holeRefs,
     decoRefs,
     remainingRef,
     startCountUpRef,
@@ -99,6 +102,7 @@ export default function Page() {
           bulletRef={bulletRef}
           decoRefCbs={decoRefCbs}
           blockRefCbs={blockRefCbs}
+          holeRefCbs={holeRefCbs}
           charShadowRefCbs={charShadowRefCbs}
           charRefCbs={charRefCbs}
           charSpriteRefCbs={charSpriteRefCbs}

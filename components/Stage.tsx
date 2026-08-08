@@ -1,5 +1,5 @@
 import { Fragment, type RefObject } from "react";
-import { BLOCK_COUNT, DECO } from "@/lib/constants";
+import { BLOCK_COUNT, DECO, HOLE_COUNT } from "@/lib/constants";
 import { PIXEL } from "@/lib/pixel";
 import { BB_SHADOW } from "@/lib/sprites/bullet";
 import { CASTLE_PIXEL, CASTLE_SHADOW } from "@/lib/sprites/castle";
@@ -17,6 +17,7 @@ type Props = {
   bulletRef: RefObject<HTMLDivElement | null>;
   decoRefCbs: Array<(el: HTMLDivElement | null) => void>;
   blockRefCbs: Array<(el: HTMLDivElement | null) => void>;
+  holeRefCbs: Array<(el: HTMLDivElement | null) => void>;
   charShadowRefCbs: Array<(el: HTMLDivElement | null) => void>;
   charRefCbs: Array<(el: HTMLDivElement | null) => void>;
   charSpriteRefCbs: Array<(el: HTMLDivElement | null) => void>;
@@ -35,6 +36,7 @@ export function Stage({
   bulletRef,
   decoRefCbs,
   blockRefCbs,
+  holeRefCbs,
   charShadowRefCbs,
   charRefCbs,
   charSpriteRefCbs,
@@ -56,6 +58,9 @@ export function Stage({
         />
       ))}
       <div className="ground" ref={groundRef} />
+      {Array.from({ length: HOLE_COUNT }).map((_, i) => (
+        <div key={`hole-${i}`} className="hole" ref={holeRefCbs[i]} aria-hidden />
+      ))}
       {Array.from({ length: BLOCK_COUNT }).map((_, i) => (
         <div key={i} className="block" ref={blockRefCbs[i]}>
           <div className="block__box" />

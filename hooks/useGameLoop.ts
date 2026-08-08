@@ -8,11 +8,22 @@ import {
   BLOCK_W,
   CHAR_H,
   CHAR_W,
+  DEATH_BOUNCE_VY,
+  DEATH_FREEZE_MS,
+  DEATH_GRAVITY,
+  DEATH_RESPAWN_MS,
   DECO,
   DECO_SPAN,
+  HOLE_AUTO_LEAD,
+  HOLE_COUNT,
+  HOLE_W,
+  IDLE_WALK_RESUME_MS,
   JUMP_DUR,
   JUMP_HEIGHT,
+  MOVE_SPEED,
   randomGap,
+  randomHoleGap,
+  RUNNER_H,
   RUNNER_W,
   SPEED,
   STAR_POWER_MS,
@@ -22,7 +33,15 @@ import { BB_W } from "@/lib/sprites/bullet";
 import { DOOR_X } from "@/lib/sprites/castle";
 import { CHARACTERS } from "@/lib/sprites/mario";
 import { RUNNERS } from "@/lib/sprites/runners";
-import { EndingPhase, makeRunner, type BlockState, type RunnerState, type Star } from "@/lib/types";
+import {
+  EndingPhase,
+  makeRunner,
+  type BlockState,
+  type DeathKind,
+  type HoleState,
+  type RunnerState,
+  type Star,
+} from "@/lib/types";
 import type { WalkFrames } from "@/lib/pixel";
 
 export type GameLoopRefs = {
@@ -41,10 +60,69 @@ export type GameLoopRefs = {
   charSpriteRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   charShadowRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   blockRefs: MutableRefObject<(HTMLDivElement | null)[]>;
+  holeRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   decoRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   remainingRef: MutableRefObject<number>;
   startCountUpRef: MutableRefObject<() => void>;
 };
+
+function feetOverHole(feetX: number, holes: HoleState[], camera: number, inset = 10) {
+  for (const h of holes) {
+    const left = h.worldX - camera + inset;
+    const right = h.worldX - camera + HOLE_W - inset;
+    if (feetX >= left && feetX <= right) return true;
+  }
+  return false;
+}
+
+function holeAhead(feetX: number, facing: 1 | -1, holes: HoleState[], camera: number) {
+  if (facing < 0) return false;
+  for (const h of holes) {
+    const left = h.worldX - camera;
+    const dist = left - feetX;
+    if (dist > 0 && dist < HOLE_AUTO_LEAD) return true;
+  }
+  return false;
+}
+
+function killRunner(runner: RunnerState, now: number, jumpY: number, kind: DeathKind = "bounce") {
+  runner.dead = true;
+  runner.deathKind = kind;
+  runner.deathStart = now;
+  runner.deathY = jumpY;
+  runner.deathVy = kind === "pit" ? 1.2 : DEATH_BOUNCE_VY;
+  runner.jumping = false;
+  runner.respawnAt = now + DEATH_RESPAWN_MS;
+}
+
+function respawnRunner(
+  runner: RunnerState,
+  el: HTMLDivElement,
+  shadowEl: HTMLDivElement,
+  doorX: number,
+  now: number,
+  exitDelay: number,
+) {
+  runner.dead = false;
+  runner.deathKind = "bounce";
+  runner.deathY = 0;
+  runner.deathVy = 0;
+  runner.deathStart = 0;
+  runner.jumping = false;
+  runner.jumpStart = 0;
+  runner.facing = 1;
+  runner.lastFrame = "";
+  runner.emerged = false;
+  runner.active = true;
+  runner.x = doorX - RUNNER_W / 2;
+  runner.startAt = now + exitDelay;
+  runner.respawnAt = 0;
+  el.style.display = "block";
+  el.style.opacity = "0";
+  el.style.transform = `translate(${runner.x}px, 0px)`;
+  shadowEl.style.display = "block";
+  shadowEl.style.opacity = "0";
+}
 
 function updateRunner(
   runner: RunnerState,
@@ -54,10 +132,39 @@ function updateRunner(
   frames: WalkFrames,
   targetRatio: number,
   stageW: number,
+  stageH: number,
   now: number,
   step: number,
   framePhase: number,
+  moveDir: number,
+  wantJump: boolean,
+  controllable: boolean,
+  doorX: number,
+  animateWalk: boolean,
+  autoJump: boolean,
 ) {
+  if (runner.dead) {
+    const frozen = runner.deathKind === "bounce" && now - runner.deathStart < DEATH_FREEZE_MS;
+    if (!frozen) {
+      runner.deathVy += DEATH_GRAVITY * step;
+      runner.deathY += runner.deathVy * step;
+    }
+
+    const flip = runner.facing < 0 ? " scaleX(-1)" : "";
+    const flipY = runner.deathKind === "bounce" ? " scaleY(-1)" : "";
+    el.style.opacity = "1";
+    el.style.display = runner.deathY > stageH * 0.5 ? "none" : "block";
+    el.style.transform = `translate(${runner.x}px, ${runner.deathY}px)${flipY}${flip}`;
+    el.style.transformOrigin = "center center";
+    shadowEl.style.opacity = "0";
+    shadowEl.style.display = "none";
+
+    if (now >= runner.respawnAt) {
+      respawnRunner(runner, el, shadowEl, doorX, now, 0);
+    }
+    return;
+  }
+
   if (!runner.active || now < runner.startAt) return;
   const targetX = stageW * targetRatio;
   if (!runner.emerged) {
@@ -68,20 +175,49 @@ function updateRunner(
       runner.x = targetX;
       runner.emerged = true;
     }
-  } else {
-    runner.x = targetX;
+  } else if (controllable) {
+    if (moveDir !== 0) {
+      runner.x += moveDir * MOVE_SPEED * step;
+      runner.facing = moveDir > 0 ? 1 : -1;
+      runner.x = Math.max(8, Math.min(stageW - RUNNER_W - 8, runner.x));
+    }
+    if ((wantJump || autoJump) && !runner.jumping) {
+      runner.jumping = true;
+      runner.jumpStart = now;
+    }
   }
 
-  const frame = Math.floor(now / 120 + framePhase) % 2 ? frames.A : frames.B;
+  let jumpY = 0;
+  if (runner.jumping) {
+    const p = (now - runner.jumpStart) / JUMP_DUR;
+    if (p >= 1) {
+      runner.jumping = false;
+    } else {
+      jumpY = -4 * JUMP_HEIGHT * p * (1 - p);
+    }
+  }
+
+  const frame =
+    animateWalk || !controllable || !runner.emerged
+      ? Math.floor(now / 120 + framePhase) % 2
+        ? frames.A
+        : frames.B
+      : frames.A;
   if (frame !== runner.lastFrame) {
     spriteEl.style.boxShadow = frame;
     runner.lastFrame = frame;
   }
 
-  const bob = Math.sin(now / 80 + framePhase) * 1.5;
-  el.style.transform = `translate(${runner.x}px, ${bob}px)`;
-  shadowEl.style.transform = `translateX(${runner.x + 2}px)`;
-  shadowEl.style.opacity = String(runner.emerged ? 0.28 : 0.14);
+  const bob = runner.jumping ? 0 : Math.sin(now / 80 + framePhase) * 1.5;
+  const flip = runner.facing < 0 ? " scaleX(-1)" : "";
+  el.style.transform = `translate(${runner.x}px, ${jumpY + bob}px)${flip}`;
+  el.style.transformOrigin = "center bottom";
+  const heightAboveGround = Math.max(0, -jumpY);
+  const shadowScale = 1 - Math.min(heightAboveGround / (JUMP_HEIGHT * 1.4), 0.45);
+  shadowEl.style.transform = `translateX(${runner.x + 2}px) scale(${shadowScale})`;
+  shadowEl.style.opacity = String(
+    (runner.emerged ? 0.28 : 0.14) - heightAboveGround * 0.0015,
+  );
 }
 
 export function useGameLoop(refs: GameLoopRefs) {
@@ -102,6 +238,7 @@ export function useGameLoop(refs: GameLoopRefs) {
       charSpriteRefs,
       charShadowRefs,
       blockRefs,
+      holeRefs,
       decoRefs,
       remainingRef,
       startCountUpRef,
@@ -149,7 +286,76 @@ export function useGameLoop(refs: GameLoopRefs) {
       inside: false,
       fadeStart: 0,
       starPowerUntil: 0,
+      facing: 1 as 1 | -1,
+      dead: false,
+      deathKind: "bounce" as DeathKind,
+      deathStart: 0,
+      deathY: 0,
+      deathVy: 0,
+      respawnAt: 0,
     }));
+
+    const keys = { left: false, right: false, up: false };
+    let jumpQueued = false;
+    let lastMoveInputAt = performance.now();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) {
+        if (e.key === "ArrowUp" || e.key === " " || e.key === "w" || e.key === "W") e.preventDefault();
+        return;
+      }
+      switch (e.key) {
+        case "ArrowLeft":
+        case "a":
+        case "A":
+          keys.left = true;
+          e.preventDefault();
+          break;
+        case "ArrowRight":
+        case "d":
+        case "D":
+          keys.right = true;
+          e.preventDefault();
+          break;
+        case "ArrowUp":
+        case " ":
+        case "w":
+        case "W":
+          keys.up = true;
+          jumpQueued = true;
+          e.preventDefault();
+          break;
+        case "ArrowDown":
+        case "s":
+        case "S":
+          e.preventDefault();
+          break;
+      }
+    };
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowLeft":
+        case "a":
+        case "A":
+          keys.left = false;
+          break;
+        case "ArrowRight":
+        case "d":
+        case "D":
+          keys.right = false;
+          break;
+        case "ArrowUp":
+        case " ":
+        case "w":
+        case "W":
+          keys.up = false;
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
 
     const blocks: BlockState[] = [];
     let spawnX = Math.max(STAGE_W, 320) + 60;
@@ -160,6 +366,13 @@ export function useGameLoop(refs: GameLoopRefs) {
         jumper: Math.floor(Math.random() * CHARACTERS.length),
       });
       spawnX += randomGap();
+    }
+
+    const holes: HoleState[] = [];
+    let holeSpawnX = Math.max(STAGE_W, 320) + 420;
+    for (let i = 0; i < HOLE_COUNT; i++) {
+      holes.push({ worldX: holeSpawnX });
+      holeSpawnX += randomHoleGap();
     }
 
     const deco = DECO.map((d) => ({ ...d, worldX: d.startX }));
@@ -199,6 +412,11 @@ export function useGameLoop(refs: GameLoopRefs) {
               blocks.forEach((b) => {
                 b.worldX = x;
                 x += randomGap();
+              });
+              let hx = STAGE_W + 420;
+              holes.forEach((h) => {
+                h.worldX = hx;
+                hx += randomHoleGap();
               });
               initedPositions = true;
             } else if (prevW > 0 && STAGE_W > 0 && prevW !== STAGE_W) {
@@ -247,11 +465,53 @@ export function useGameLoop(refs: GameLoopRefs) {
         }
       }
 
+      const canControlChars =
+        !ending.active || ending.phase === EndingPhase.Approach;
+      const canControlRunners = ending.phase === EndingPhase.Aftermath;
+      const moveDir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+      const wantJump = jumpQueued;
+      jumpQueued = false;
+      if (moveDir !== 0) lastMoveInputAt = now;
+      const idleWalk = now - lastMoveInputAt >= IDLE_WALK_RESUME_MS;
+
       chars.forEach((ch, i) => {
         const charEl = charRefs.current[i];
         const spriteEl = charSpriteRefs.current[i];
         const shadowEl = charShadowRefs.current[i];
         if (!charEl || !spriteEl || !shadowEl) return;
+
+        if (ch.dead) {
+          const frozen = ch.deathKind === "bounce" && now - ch.deathStart < DEATH_FREEZE_MS;
+          if (!frozen) {
+            ch.deathVy += DEATH_GRAVITY * step;
+            ch.deathY += ch.deathVy * step;
+          }
+          const flip = ch.facing < 0 ? " scaleX(-1)" : "";
+          const flipY = ch.deathKind === "bounce" ? " scaleY(-1)" : "";
+          charEl.style.opacity = "1";
+          charEl.style.display = ch.deathY > STAGE_H * 0.5 ? "none" : "block";
+          charEl.style.transform = `translate(${ch.x}px, ${ch.deathY}px)${flipY}${flip}`;
+          charEl.style.transformOrigin = "center center";
+          shadowEl.style.opacity = "0";
+          if (now >= ch.respawnAt) {
+            ch.dead = false;
+            ch.deathKind = "bounce";
+            ch.deathY = 0;
+            ch.deathVy = 0;
+            ch.deathStart = 0;
+            ch.jumping = false;
+            ch.jumpTarget = -1;
+            ch.facing = 1;
+            ch.lastFrame = "";
+            ch.x = STAGE_W * CHARACTERS[i].xRatio;
+            ch.respawnAt = 0;
+            charEl.style.display = "block";
+            charEl.style.opacity = "1";
+            charEl.style.transform = `translate(${ch.x}px, 0px)`;
+            shadowEl.style.opacity = "0.28";
+          }
+          return;
+        }
 
         if (ending.active && ending.phase === EndingPhase.Enter && i === ending.enterCharIdx) {
           ch.x += 1.7 * step;
@@ -261,7 +521,35 @@ export function useGameLoop(refs: GameLoopRefs) {
           }
         }
 
-        if (!ending.active) {
+        if (canControlChars && !ch.inside) {
+          if (moveDir !== 0) {
+            ch.x += moveDir * MOVE_SPEED * step;
+            ch.facing = moveDir > 0 ? 1 : -1;
+            ch.x = Math.max(8, Math.min(STAGE_W - CHAR_W - 8, ch.x));
+          }
+          const autoJumpHole =
+            idleWalk &&
+            !ch.jumping &&
+            holeAhead(ch.x + CHAR_W / 2, ch.facing, holes, state.camera);
+          if ((wantJump || autoJumpHole) && !ch.jumping) {
+            ch.jumping = true;
+            ch.jumpStart = now;
+            ch.jumpTarget = -1;
+            for (let idx = 0; idx < blocks.length; idx++) {
+              const b = blocks[idx];
+              if (b.hit) continue;
+              const sx = b.worldX - state.camera;
+              const cx = ch.x + CHAR_W / 2;
+              const bx = sx + BLOCK_W / 2;
+              if (Math.abs(cx - bx) < BLOCK_W * 0.85) {
+                ch.jumpTarget = idx;
+                break;
+              }
+            }
+          }
+        }
+
+        if (!ending.active && !ch.jumping) {
           let nearest: { idx: number; dist: number } | null = null;
           for (let idx = 0; idx < blocks.length; idx++) {
             const b = blocks[idx];
@@ -271,7 +559,7 @@ export function useGameLoop(refs: GameLoopRefs) {
             if (dist < 0) continue;
             if (!nearest || dist < nearest.dist) nearest = { idx, dist };
           }
-          if (nearest && !ch.jumping && nearest.dist < 72) {
+          if (nearest && nearest.dist < 72) {
             ch.jumping = true;
             ch.jumpStart = now;
             ch.jumpTarget = nearest.idx;
@@ -289,8 +577,32 @@ export function useGameLoop(refs: GameLoopRefs) {
           }
         }
 
+        if (
+          !ch.inside &&
+          !ch.jumping &&
+          jumpY >= 0 &&
+          feetOverHole(ch.x + CHAR_W / 2, holes, state.camera)
+        ) {
+          ch.dead = true;
+          ch.deathKind = "pit";
+          ch.deathStart = now;
+          ch.deathY = 0;
+          ch.deathVy = 1.2;
+          ch.respawnAt = now + DEATH_RESPAWN_MS;
+          return;
+        }
+
         const frames = CHARACTERS[i].frames;
-        const frame = ch.jumping ? frames.JUMP : Math.floor(now / 130 + ch.framePhase) % 2 ? frames.A : frames.B;
+        const moving = moveDir !== 0 && canControlChars && !ch.inside;
+        const walkAnim =
+          moving || !ending.active || (canControlChars && !ch.inside && idleWalk);
+        const frame = ch.jumping
+          ? frames.JUMP
+          : walkAnim
+            ? Math.floor(now / 130 + ch.framePhase) % 2
+              ? frames.A
+              : frames.B
+            : frames.A;
         if (frame !== ch.lastFrame) {
           spriteEl.style.boxShadow = frame;
           ch.lastFrame = frame;
@@ -305,7 +617,9 @@ export function useGameLoop(refs: GameLoopRefs) {
         }
 
         const bob = ch.jumping ? 0 : Math.sin(now / 80 + ch.bobPhase) * 1.5;
-        charEl.style.transform = `translate(${ch.x}px, ${jumpY + bob}px)`;
+        const flip = ch.facing < 0 ? " scaleX(-1)" : "";
+        charEl.style.transform = `translate(${ch.x}px, ${jumpY + bob}px)${flip}`;
+        charEl.style.transformOrigin = "center bottom";
         const heightAboveGround = Math.max(0, -jumpY);
         const shadowScale = 1 - Math.min(heightAboveGround / (JUMP_HEIGHT * 1.4), 0.45);
         shadowEl.style.transform = `translateX(${ch.x - 2}px) scale(${shadowScale})`;
@@ -369,10 +683,27 @@ export function useGameLoop(refs: GameLoopRefs) {
         el.style.display = !blocksLive || sx > STAGE_W + 80 || sx < -BLOCK_W - 30 ? "none" : "block";
       });
 
+      const holesLive =
+        !ending.active ||
+        ending.phase === EndingPhase.Approach ||
+        ending.phase === EndingPhase.Aftermath;
+      holes.forEach((h, idx) => {
+        const el = holeRefs.current[idx];
+        if (!el) return;
+        const sx = h.worldX - state.camera;
+        if (holesLive && sx + HOLE_W < -40) {
+          const maxWorldX = Math.max(...holes.map((o) => o.worldX));
+          h.worldX = maxWorldX + randomHoleGap();
+        }
+        el.style.transform = `translateX(${sx}px)`;
+        el.style.display =
+          !holesLive || sx > STAGE_W + 80 || sx < -HOLE_W - 40 ? "none" : "block";
+      });
+
       if (state.star.active) {
         const st = state.star;
         const target = chars[st.target];
-        if (!target) {
+        if (!target || target.dead || target.inside) {
           state.star.active = false;
           star.style.display = "none";
         } else {
@@ -470,6 +801,11 @@ export function useGameLoop(refs: GameLoopRefs) {
             const cfg = RUNNERS[i];
             const els = runnerEls[i];
             runner.active = true;
+            runner.dead = false;
+            runner.deathY = 0;
+            runner.deathVy = 0;
+            runner.jumping = false;
+            runner.facing = 1;
             runner.x = doorCenter - RUNNER_W / 2;
             runner.emerged = false;
             runner.startAt = now + cfg.exitDelay;
@@ -486,20 +822,63 @@ export function useGameLoop(refs: GameLoopRefs) {
         }
       }
 
+      const bulletBob =
+        ending.phase === EndingPhase.Aftermath ? Math.sin(now / 140) * 3 : 0;
       if (ending.phase === EndingPhase.Aftermath) {
-        const bob = Math.sin(now / 140) * 3;
         const fadeIn = Math.min(1, (now - (ending.volcanoStart + VOLCANO_MS)) / 500);
         bulletEl.style.opacity = String(fadeIn);
-        bulletEl.style.transform = `translate(${BB_SCREEN_X}px, ${bob}px)`;
+        bulletEl.style.transform = `translate(${BB_SCREEN_X}px, ${bulletBob}px)`;
       }
+
+      const doorCenter = ending.castleWorldX - state.camera + DOOR_X;
+      // Shared coords: translateY negative = up. Runner feet baseline y=0 (bottom 38%).
+      // Bullet CSS bottom is 38%+28px, so its body sits ~28–70px above runner feet.
+      const bbLeft = BB_SCREEN_X + 6;
+      const bbRight = BB_SCREEN_X + BB_W - 6;
+      const bbFeet = bulletBob - 28;
+      const bbHead = bulletBob - 28 - 42;
 
       runners.forEach((runner, i) => {
         const cfg = RUNNERS[i];
         const els = runnerEls[i];
-        if (cfg.startsCountUp && runner.active && now >= runner.startAt && !countUpStarted) {
+        if (cfg.startsCountUp && runner.active && !runner.dead && now >= runner.startAt && !countUpStarted) {
           countUpStarted = true;
           startCountUpRef.current();
         }
+
+        let jumpY = 0;
+        if (!runner.dead && runner.jumping) {
+          const p = (now - runner.jumpStart) / JUMP_DUR;
+          if (p < 1) jumpY = -4 * JUMP_HEIGHT * p * (1 - p);
+        }
+
+        const runnerControllable =
+          canControlRunners && runner.active && runner.emerged && !runner.dead && now >= runner.startAt;
+
+        if (runnerControllable) {
+          const rLeft = runner.x + 6;
+          const rRight = runner.x + RUNNER_W - 6;
+          const rFeet = jumpY;
+          const rHead = jumpY - RUNNER_H;
+          const overlapX = rLeft < bbRight && rRight > bbLeft;
+          const overlapY = rFeet > bbHead && rHead < bbFeet;
+          if (overlapX && overlapY) {
+            killRunner(runner, now, jumpY, "bounce");
+          } else if (
+            !runner.jumping &&
+            jumpY >= 0 &&
+            feetOverHole(runner.x + RUNNER_W / 2, holes, state.camera)
+          ) {
+            killRunner(runner, now, 0, "pit");
+          }
+        }
+
+        const autoJumpHole =
+          runnerControllable &&
+          idleWalk &&
+          !runner.jumping &&
+          holeAhead(runner.x + RUNNER_W / 2, runner.facing, holes, state.camera);
+
         updateRunner(
           runner,
           els.el!,
@@ -508,9 +887,16 @@ export function useGameLoop(refs: GameLoopRefs) {
           cfg.frames,
           cfg.xRatio,
           STAGE_W,
+          STAGE_H,
           now,
           step,
           cfg.framePhase,
+          moveDir,
+          wantJump,
+          runnerControllable,
+          doorCenter,
+          (moveDir !== 0 || idleWalk) && runnerControllable,
+          autoJumpHole,
         );
       });
 
@@ -534,6 +920,8 @@ export function useGameLoop(refs: GameLoopRefs) {
       cancelled = true;
       cancelAnimationFrame(raf);
       ro?.disconnect();
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
