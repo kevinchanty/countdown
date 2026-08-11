@@ -45,14 +45,14 @@ import {
 import type { WalkFrames } from "@/lib/pixel";
 
 export type GameLoopRefs = {
-  stageRef: RefObject<HTMLDivElement>;
-  groundRef: RefObject<HTMLDivElement>;
-  starRef: RefObject<HTMLDivElement>;
-  castleRef: RefObject<HTMLDivElement>;
-  flagRef: RefObject<HTMLDivElement>;
-  volcanoSkyRef: RefObject<HTMLDivElement>;
-  volcanoPageRef: RefObject<HTMLDivElement>;
-  bulletRef: RefObject<HTMLDivElement>;
+  stageRef: RefObject<HTMLDivElement | null>;
+  groundRef: RefObject<HTMLDivElement | null>;
+  starRef: RefObject<HTMLDivElement | null>;
+  castleRef: RefObject<HTMLDivElement | null>;
+  flagRef: RefObject<HTMLDivElement | null>;
+  volcanoSkyRef: RefObject<HTMLDivElement | null>;
+  volcanoPageRef: RefObject<HTMLDivElement | null>;
+  bulletRef: RefObject<HTMLDivElement | null>;
   runnerRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   runnerSpriteRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   runnerShadowRefs: MutableRefObject<(HTMLDivElement | null)[]>;

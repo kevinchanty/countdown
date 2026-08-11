@@ -36,14 +36,14 @@ export default function Page() {
   const countingUp = countUpStart !== null;
   const timerMs = countingUp ? elapsedMs : remaining;
 
-  const stageRef = useRef<HTMLDivElement>(null);
-  const groundRef = useRef<HTMLDivElement>(null);
-  const starRef = useRef<HTMLDivElement>(null);
-  const castleRef = useRef<HTMLDivElement>(null);
-  const flagRef = useRef<HTMLDivElement>(null);
-  const volcanoSkyRef = useRef<HTMLDivElement>(null);
-  const volcanoPageRef = useRef<HTMLDivElement>(null);
-  const bulletRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const groundRef = useRef<HTMLDivElement | null>(null);
+  const starRef = useRef<HTMLDivElement | null>(null);
+  const castleRef = useRef<HTMLDivElement | null>(null);
+  const flagRef = useRef<HTMLDivElement | null>(null);
+  const volcanoSkyRef = useRef<HTMLDivElement | null>(null);
+  const volcanoPageRef = useRef<HTMLDivElement | null>(null);
+  const bulletRef = useRef<HTMLDivElement | null>(null);
 
   const runnerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const runnerSpriteRefs = useRef<(HTMLDivElement | null)[]>([]);
