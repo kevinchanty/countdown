@@ -8,13 +8,13 @@ import { RUNNERS } from "@/lib/sprites/runners";
 import { Character } from "./Character";
 
 type Props = {
-  stageRef: RefObject<HTMLDivElement | null>;
-  groundRef: RefObject<HTMLDivElement | null>;
-  starRef: RefObject<HTMLDivElement | null>;
-  castleRef: RefObject<HTMLDivElement | null>;
-  flagRef: RefObject<HTMLDivElement | null>;
-  volcanoSkyRef: RefObject<HTMLDivElement | null>;
-  bulletRef: RefObject<HTMLDivElement | null>;
+  stageRef: RefObject<HTMLDivElement>;
+  groundRef: RefObject<HTMLDivElement>;
+  starRef: RefObject<HTMLDivElement>;
+  castleRef: RefObject<HTMLDivElement>;
+  flagRef: RefObject<HTMLDivElement>;
+  volcanoSkyRef: RefObject<HTMLDivElement>;
+  bulletRef: RefObject<HTMLDivElement>;
   decoRefCbs: Array<(el: HTMLDivElement | null) => void>;
   blockRefCbs: Array<(el: HTMLDivElement | null) => void>;
   holeRefCbs: Array<(el: HTMLDivElement | null) => void>;

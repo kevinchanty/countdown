@@ -59,6 +59,18 @@ main {
   transform-origin: center center;
 }
 
+.disclaimer {
+  position: fixed;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
 /* ---- Timer ---- */
 .timer {
   text-align: center;

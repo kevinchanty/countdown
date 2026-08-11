@@ -111,6 +111,7 @@ export default function Page() {
           runnerShadowRefCbs={runnerShadowRefCbs}
         />
       </main>
+      <p className="disclaimer">本網站與1137dtz.cc沒有任何關係</p>
     </>
   );
 }
