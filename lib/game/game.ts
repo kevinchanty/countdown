@@ -436,6 +436,7 @@ export class MarioGame {
 
       if (!p.dead) this.playerFx(p, now, step);
       if (p.y > this.level.h * TILE + 8) this.kill(p, now);
+      else if (!p.dead && !p.inside && this.playerHitsCanvas(p)) this.kill(p, now);
     });
   }
 
@@ -526,15 +527,6 @@ export class MarioGame {
       if (!landed && !wasGrounded && p.grounded && fallSpeed > 3.5) landed = true;
     }
     if (landed) this.spawnPoof(p);
-    // Classic left-edge screen wall during free play (keeps the trailing
-    // player from being abandoned off-camera), but never shove into solids.
-    if (this.mode === "playing") {
-      const minX = this.camera.x + 2;
-      if (p.x < minX && !this.boxHitsSolid(minX, p.y, p.w, p.h)) {
-        p.x = minX;
-        if (p.vx < 0) p.vx = 0;
-      }
-    }
     p.anim += Math.abs(p.vx) * 0.18 * step;
   }
 
@@ -1005,6 +997,15 @@ export class MarioGame {
     this.kill(p, now);
   }
 
+  private playerHitsCanvas(p: Player) {
+    return p.x <= this.camera.x || p.x + p.w >= this.camera.x + VIEW_W || p.y <= 0 || p.y + p.h >= VIEW_H;
+  }
+
+  private runnerHitsCanvas(r: Runner, jumpY: number) {
+    const y = r.y + jumpY;
+    return r.x <= 0 || r.x + r.w >= VIEW_W || y <= 0 || y + r.h >= VIEW_H;
+  }
+
   private kill(p: Player, now: number) {
     if (p.dead || p.inside) return;
     p.dead = true;
@@ -1358,7 +1359,6 @@ export class MarioGame {
     r.w = img.width * s;
     r.h = img.height * s;
     r.y = (this.level.h - 2) * TILE - r.h;
-    r.x = Math.max(8, Math.min(VIEW_W - r.w - 8, r.x));
   }
 
   private growRunner(r: Runner, now: number) {
@@ -1480,7 +1480,6 @@ export class MarioGame {
         if (userMove !== 0) {
           r.x += userMove * MOVE_SPEED * step;
           r.facing = userMove > 0 ? 1 : -1;
-          r.x = Math.max(8, Math.min(VIEW_W - r.w - 8, r.x));
         }
         const autoJump = auto && !r.jumping && (this.holeAhead(r.x + r.w / 2) || this.enemyAhead(r.x + r.w / 2));
         if ((userJump || autoJump) && !r.jumping) {
@@ -1517,6 +1516,10 @@ export class MarioGame {
           } else if (!r.jumping && jumpY >= 0 && this.feetOverHole(r.x + r.w / 2)) {
             this.killRunner(r, now, 0, "pit");
           }
+        }
+        if (!r.dead && this.runnerHitsCanvas(r, jumpY)) {
+          const y = r.y + jumpY;
+          this.killRunner(r, now, jumpY, y + r.h >= VIEW_H ? "pit" : "bounce");
         }
       }
 
