@@ -517,6 +517,7 @@ export class MarioGame {
     for (let i = 0; i < n; i++) {
       p.x += (p.vx * step) / n;
       this.collideAxis(p, "x");
+      this.collideOtherPlayersX(p);
       p.y += (p.vy * step) / n;
       const hitHead = this.collideAxis(p, "y");
       if (hitHead && p.vy <= 0 && !bumped) {
@@ -528,6 +529,22 @@ export class MarioGame {
     }
     if (landed) this.spawnPoof(p);
     p.anim += Math.abs(p.vx) * 0.18 * step;
+  }
+
+  // Players should not occupy the same body space; treat peers like soft walls.
+  private collideOtherPlayersX(p: Player) {
+    for (const other of this.players) {
+      if (other === p || other.dead || other.inside) continue;
+      if (!aabb(p.x, p.y, p.w, p.h, other.x, other.y, other.w, other.h)) continue;
+      if (p.vx > 0) p.x = Math.min(p.x, other.x - p.w);
+      else if (p.vx < 0) p.x = Math.max(p.x, other.x + other.w);
+      else {
+        const pMid = p.x + p.w / 2;
+        const oMid = other.x + other.w / 2;
+        p.x = pMid <= oMid ? other.x - p.w : other.x + other.w;
+      }
+      p.vx = 0;
+    }
   }
 
   private boxHitsSolid(x: number, y: number, w: number, h: number) {
@@ -1530,6 +1547,34 @@ export class MarioGame {
       r.y = ground - r.h;
       r.anim += 0.15 * step;
       r.opacity = 1;
+    }
+
+    this.resolveRunnerOverlap(now);
+  }
+
+  // Keep runners from visually stacking during the volcano control segment.
+  private resolveRunnerOverlap(now: number) {
+    const active = this.runners.filter((r) => !r.dead && r.active && r.emerged && r.opacity > 0);
+    for (let i = 0; i < active.length; i++) {
+      for (let j = i + 1; j < active.length; j++) {
+        const a = active[i];
+        const b = active[j];
+        const ay = a.y + this.peekJumpY(a, now);
+        const by = b.y + this.peekJumpY(b, now);
+        if (!aabb(a.x, ay, a.w, a.h, b.x, by, b.w, b.h)) continue;
+        const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        if (overlapX <= 0) continue;
+        const push = overlapX / 2 + 0.25;
+        if (a.x + a.w / 2 <= b.x + b.w / 2) {
+          a.x -= push;
+          b.x += push;
+        } else {
+          a.x += push;
+          b.x -= push;
+        }
+        a.x = Math.max(0, Math.min(VIEW_W - a.w, a.x));
+        b.x = Math.max(0, Math.min(VIEW_W - b.w, b.x));
+      }
     }
   }
 
