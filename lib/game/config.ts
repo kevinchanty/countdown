@@ -50,10 +50,10 @@ export const HOLE_COUNT = 2;
 export const randomHoleGap = () => 780 + Math.random() * 920;
 
 export const RUNNER_DEFS = [
-  { name: "Penguin", kind: "penguin" as const, xRatio: 0.18, exitDelay: 0, startsCountUp: false, scale: 1 },
-  { name: "Toad", kind: "toad" as const, xRatio: 0.32, exitDelay: 700, startsCountUp: false, scale: 1 },
-  { name: "BigPen", kind: "bigpen" as const, xRatio: 0.48, exitDelay: 1400, startsCountUp: false, scale: 1.2 },
-  { name: "Kirby", kind: "kirby" as const, xRatio: 0.64, exitDelay: 2100, startsCountUp: true, scale: 1 },
+  { name: "北小企", kind: "penguin" as const, xRatio: 0.18, exitDelay: 0, startsCountUp: false, scale: 1 },
+  { name: "Kevin", kind: "toad" as const, xRatio: 0.32, exitDelay: 700, startsCountUp: false, scale: 1 },
+  { name: "Chris", kind: "bigpen" as const, xRatio: 0.48, exitDelay: 1400, startsCountUp: false, scale: 1 },
+  { name: "Sophia", kind: "kirby" as const, xRatio: 0.64, exitDelay: 2100, startsCountUp: true, scale: 1 },
 ];
 
 export const COLORS = {

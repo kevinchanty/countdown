@@ -11,9 +11,7 @@ body {
 
 body {
   font-family: var(--font-mario), "Press Start 2P", monospace;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 100%, #1a3a8a 0%, transparent 70%),
-    #1b2d6b;
+  background: radial-gradient(ellipse 80% 50% at 50% 100%, #1a3a8a 0%, transparent 70%), #1b2d6b;
   color: #fcfcfc;
   min-height: 100vh;
   overflow: hidden;
@@ -46,8 +44,12 @@ body {
   opacity: 0.7;
 }
 @keyframes ashdrift {
-  from { transform: translateY(8%) translateX(0); }
-  to { transform: translateY(-12%) translateX(3%); }
+  from {
+    transform: translateY(8%) translateX(0);
+  }
+  to {
+    transform: translateY(-12%) translateX(3%);
+  }
 }
 
 .shell {
@@ -67,7 +69,7 @@ body {
   z-index: 2;
 }
 .timer__label {
-  font-size: clamp(8px, 1.6vw, 12px);
+  font-size: clamp(24px, 1.6vw, 24px);
   letter-spacing: 1px;
   line-height: 1.5;
   color: #fcbc3c;
@@ -95,7 +97,7 @@ body {
 
 .game-canvas {
   display: block;
-  width: min(96vw, 1280px);
+  width: min(96vw, 960px);
   height: auto;
   aspect-ratio: 16 / 9;
   image-rendering: pixelated;
@@ -147,21 +149,29 @@ body {
   background: #c84c0c;
   color: #fff;
   text-shadow: 1px 1px 0 #000;
-  box-shadow: inset 0 -4px 0 #8c3c00, 0 4px 0 #000;
+  box-shadow:
+    inset 0 -4px 0 #8c3c00,
+    0 4px 0 #000;
 }
 .pad__btn--a {
   background: #e52521;
-  box-shadow: inset 0 -4px 0 #9a1810, 0 4px 0 #000;
+  box-shadow:
+    inset 0 -4px 0 #9a1810,
+    0 4px 0 #000;
 }
 .pad__btn--wide {
   width: 72px;
   border-radius: 16px;
   background: #2057d6;
-  box-shadow: inset 0 -4px 0 #143a96, 0 4px 0 #000;
+  box-shadow:
+    inset 0 -4px 0 #143a96,
+    0 4px 0 #000;
 }
 .pad__btn:active {
   transform: translateY(3px);
-  box-shadow: inset 0 -1px 0 #000, 0 1px 0 #000;
+  box-shadow:
+    inset 0 -1px 0 #000,
+    0 1px 0 #000;
 }
 
 @media (pointer: coarse), (max-width: 800px) {
