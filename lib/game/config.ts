@@ -10,7 +10,8 @@ export const MAX_FALL = 7.5;
 export const WALK_ACCEL = 0.14;
 export const RUN_ACCEL = 0.22;
 export const MAX_WALK = 1.55;
-export const MAX_RUN = 2.55;
+/** Faster than camera SPEED so a sprint can catch the screen edge. */
+export const MAX_RUN = 3.2;
 export const FRICTION = 0.12;
 export const AIR_FRICTION = 0.04;
 export const JUMP_VEL = -7.15;

@@ -1103,7 +1103,11 @@ export class MarioGame {
       const maxX = Math.max(...living.map((p) => p.x));
       if (maxX - minX < VIEW_W - 72) target = Math.min(target, minX - 24);
     }
-    this.camera.x += (target - this.camera.x) * 0.14 * step;
+    // Camera scrolls at most SPEED, so a sprint (MAX_RUN) can outrun it and
+    // hit the screen wall — same as the original auto-scroll world.
+    const dx = (target - this.camera.x) * 0.14 * step;
+    const maxCamSpeed = SPEED * step;
+    this.camera.x += Math.max(-maxCamSpeed, Math.min(maxCamSpeed, dx));
     let maxCam = Math.max(0, this.level.w * TILE - VIEW_W);
     if (towardCastle) maxCam = Math.max(0, this.endingCastleX - 40);
     this.camera.x = Math.max(0, Math.min(maxCam, this.camera.x));
