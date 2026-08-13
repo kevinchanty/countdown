@@ -10,17 +10,15 @@ body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #3a6fd8;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-family: var(--font-mario), "Press Start 2P", monospace;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 100%, #1a3a8a 0%, transparent 70%),
+    #1b2d6b;
+  color: #fcfcfc;
   min-height: 100vh;
   overflow: hidden;
 }
 
-/* full-page volcano wash (fades in after flag is raised) */
 .page-volcano {
   position: fixed;
   inset: 0;
@@ -32,7 +30,6 @@ body {
     radial-gradient(ellipse 70% 40% at 20% 100%, #ff2200 0%, transparent 50%),
     radial-gradient(ellipse 70% 40% at 80% 100%, #cc1100 0%, transparent 50%),
     linear-gradient(180deg, #1a0508 0%, #4a0a10 35%, #8b1a12 70%, #c43a14 100%);
-  will-change: opacity;
 }
 .page-volcano::after {
   content: "";
@@ -48,487 +45,133 @@ body {
   animation: ashdrift 18s linear infinite;
   opacity: 0.7;
 }
-
-/* render the page at the equivalent of 175% browser zoom.
-   (transform: scale scales the whole subtree, including the game's
-   translate() positions — CSS `zoom` would not.) */
-main {
-  position: relative;
-  z-index: 1;
-  transform: scale(1.75);
-  transform-origin: center center;
-}
-
-.disclaimer {
-  position: fixed;
-  bottom: 12px;
-  left: 0;
-  right: 0;
-  z-index: 2;
-  text-align: center;
-  font-size: 12px;
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-/* ---- Timer ---- */
-.timer {
-  text-align: center;
-  margin-bottom: 28px;
-}
-.timer__label {
-  font-size: 14px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  opacity: 0.85;
-}
-.timer__value {
-  font-size: 64px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 4px 4px 0 #00000040;
-  margin-top: 6px;
-}
-
-/* ---- Stage ---- */
-.stage {
-  position: relative;
-  width: min(92vw, 820px);
-  height: 320px;
-  background: linear-gradient(#6db3f2 0%, #9ecffb 55%, #bfe3ff 62%);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-}
-
-/* stage volcano sky / eruption (opacity driven by JS over 2 min) */
-.stage__volcano {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  will-change: opacity;
-  background:
-    radial-gradient(ellipse 55% 35% at 72% 58%, rgba(255, 90, 0, 0.75) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 28% at 72% 52%, rgba(255, 220, 80, 0.55) 0%, transparent 65%),
-    linear-gradient(
-      180deg,
-      #2a060c 0%,
-      #6b1018 28%,
-      #b82818 52%,
-      #e85a20 70%,
-      #ffb040 88%,
-      #ffd080 100%
-    );
-}
-/* volcano mountain silhouette on the horizon */
-.stage__volcano::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 38%;
-  height: 42%;
-  background:
-    radial-gradient(ellipse 18% 55% at 72% 100%, #ff6a00 0%, #ff2200 35%, transparent 70%),
-    linear-gradient(175deg, transparent 40%, #1a0a08 40.5%),
-    linear-gradient(185deg, transparent 48%, #120806 48.5%);
-  clip-path: polygon(
-    0% 100%,
-    8% 88%,
-    18% 92%,
-    28% 78%,
-    38% 85%,
-    48% 70%,
-    58% 76%,
-    66% 42%,
-    70% 48%,
-    72% 48%,
-    74% 48%,
-    78% 40%,
-    88% 72%,
-    94% 80%,
-    100% 76%,
-    100% 100%
-  );
-  background-color: #1c0c0a;
-  box-shadow: 0 -8px 24px rgba(255, 60, 0, 0.45);
-}
-/* eruption plume + lava glow pulse */
-.stage__volcano::after {
-  content: "";
-  position: absolute;
-  left: 64%;
-  bottom: 55%;
-  width: 18%;
-  height: 48%;
-  background:
-    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(255, 200, 40, 0.95) 0%, transparent 70%),
-    radial-gradient(ellipse 90% 70% at 50% 80%, rgba(255, 80, 0, 0.7) 0%, transparent 75%),
-    radial-gradient(ellipse 120% 100% at 50% 40%, rgba(40, 20, 20, 0.55) 0%, transparent 70%);
-  filter: blur(2px);
-  animation: eruptpulse 2.4s ease-in-out infinite;
-  transform-origin: center bottom;
-}
-.stage__ash {
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(1.5px 1.5px at 10% 15%, rgba(255, 210, 140, 0.85) 0, transparent 100%),
-    radial-gradient(1px 1px at 22% 40%, rgba(255, 160, 80, 0.7) 0, transparent 100%),
-    radial-gradient(2px 2px at 35% 22%, rgba(255, 230, 160, 0.8) 0, transparent 100%),
-    radial-gradient(1px 1px at 48% 55%, rgba(200, 80, 40, 0.65) 0, transparent 100%),
-    radial-gradient(1.5px 1.5px at 60% 18%, rgba(255, 200, 100, 0.75) 0, transparent 100%),
-    radial-gradient(1px 1px at 72% 45%, rgba(255, 140, 60, 0.7) 0, transparent 100%),
-    radial-gradient(2px 2px at 85% 30%, rgba(255, 220, 120, 0.8) 0, transparent 100%),
-    radial-gradient(1px 1px at 93% 60%, rgba(180, 60, 30, 0.6) 0, transparent 100%);
-  animation: ashdrift 14s linear infinite;
-  opacity: 0.85;
-  mix-blend-mode: screen;
-}
 @keyframes ashdrift {
   from { transform: translateY(8%) translateX(0); }
   to { transform: translateY(-12%) translateX(3%); }
 }
-@keyframes eruptpulse {
-  0%, 100% { opacity: 0.75; transform: scaleY(1) scaleX(1); }
-  50% { opacity: 1; transform: scaleY(1.12) scaleX(1.06); }
-}
 
-/* scenery sits above volcano sky */
-.stage > .deco,
-.stage > .ground,
-.stage > .hole,
-.stage > .block,
-.stage > .star,
-.stage > .mario__shadow,
-.stage > .mario,
-.stage > .runner,
-.stage > .runner__shadow,
-.stage > .bullet,
-.stage > .castle {
-  z-index: 1;
-}
-
-/* ---- Ground (brick pattern scrolls via background-position) ---- */
-.ground {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 38%;
-  background-color: #d2852c;
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.28) 0 3px,
-      transparent 3px 32px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.16) 0 3px,
-      transparent 3px 16px
-    );
-  background-size: 32px 100%;
-  background-repeat: repeat;
-}
-/* grass strip on top of the ground */
-.ground::before {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: 0;
-  right: 0;
-  height: 10px;
-  background: linear-gradient(#7ce85f 0 35%, #3fbf4a 35% 100%);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
-}
-
-/* ---- Pit / hole in the ground ---- */
-.hole {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 78px;
-  height: 38%;
-  background:
-    linear-gradient(180deg, #1a120c 0 12%, #0d0a08 12% 100%);
-  box-shadow:
-    inset 6px 0 0 rgba(0, 0, 0, 0.45),
-    inset -6px 0 0 rgba(0, 0, 0, 0.45),
-    inset 0 10px 14px rgba(0, 0, 0, 0.55);
-  will-change: transform;
-  display: none;
-  z-index: 1;
-}
-.hole::before {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: 0;
-  right: 0;
-  height: 10px;
-  background: #1a120c;
-  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.35);
-}
-
-/* ---- Decorative scenery (parallax) ---- */
-.deco {
-  position: absolute;
-  pointer-events: none;
-  will-change: transform;
-}
-.deco--hill {
-  bottom: 38%;
-  width: 150px;
-  height: 74px;
-  background: #3aa64a;
-  border-radius: 90px 90px 0 0;
-  box-shadow: inset -10px -8px 0 0 #2f8b3d;
-}
-.deco--cloud {
-  width: 74px;
-  height: 26px;
-  background: #fff;
-  border-radius: 26px;
-  box-shadow:
-    20px -12px 0 0 #fff,
-    42px -4px 0 0 #fff,
-    -18px -8px 0 0 #fff;
-  opacity: 0.95;
-}
-.deco--bush {
-  bottom: 38%;
-  width: 70px;
-  height: 26px;
-  background: #3fbf4a;
-  border-radius: 30px;
-  box-shadow:
-    26px -12px 0 0 #3fbf4a,
-    52px 0 0 0 #3fbf4a;
-}
-
-/* ---- Block ---- */
-.block {
-  position: absolute;
-  left: 0;
-  bottom: 38%;
-  width: 46px;
-  height: 46px;
-  margin-bottom: 58px;
-  will-change: transform;
-}
-.block__box {
-  width: 100%;
-  height: 100%;
-  background: #f4a900;
-  border: 3px solid #000;
-  border-radius: 4px;
-  box-shadow: inset 0 0 0 3px #ffd34d, inset 0 -10px 0 0 #c47e00;
+.shell {
   position: relative;
-}
-.block__box::after {
-  content: "?";
-  position: absolute;
-  inset: 0;
+  z-index: 1;
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 26px;
-  color: #fff;
-  text-shadow: 2px 2px 0 #7a4a00;
-}
-/* gentle shimmer while it's still a "?" block (no transform -> no conflicts) */
-.block:not(.block--hit) .block__box {
-  animation: qpulse 1.2s ease-in-out infinite;
-}
-@keyframes qpulse {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.15); }
-}
-.block--hit .block__box {
-  background: #8a6a3a;
-  box-shadow: inset 0 0 0 3px #a07f4d, inset 0 -10px 0 0 #5e4525;
-  animation: none;
-}
-.block--hit .block__box::after {
-  content: "";
-}
-/* bump animates the INNER box, so the outer translateX is untouched */
-.block--bump .block__box {
-  animation: bump 260ms ease;
-}
-@keyframes bump {
-  0% { transform: translateY(0); }
-  40% { transform: translateY(-14px); }
-  100% { transform: translateY(0); }
+  gap: 12px;
+  padding: 12px 12px 20px;
 }
 
-/* ---- Star ---- */
-.star {
-  position: absolute;
-  width: 38px;
-  height: 38px;
-  pointer-events: none;
-  transform-origin: center;
-  will-change: transform;
-  filter: drop-shadow(0 0 8px #ffe259);
-}
-.star__sprite {
-  display: block;
-  font-size: 38px;
-  line-height: 38px;
+.timer {
   text-align: center;
-  animation: starspin 0.7s linear infinite;
+  z-index: 2;
 }
-@keyframes starspin {
-  to { transform: rotate(360deg); }
-}
-
-/* ---- Characters (Mario & Luigi) ---- */
-.mario {
-  position: absolute;
-  left: 0;
-  bottom: 38%;
-  width: 36px;
-  height: 45px;
-  will-change: transform;
-}
-.char__name {
-  position: absolute;
-  top: -17px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
-  font-weight: 800;
+.timer__label {
+  font-size: clamp(8px, 1.6vw, 12px);
   letter-spacing: 1px;
-  color: #fff;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.55);
-  white-space: nowrap;
-  pointer-events: none;
+  line-height: 1.5;
+  color: #fcbc3c;
+  text-shadow: 2px 2px 0 #000;
+  max-width: 92vw;
 }
-.mario__shadow {
-  position: absolute;
-  left: 0;
-  bottom: calc(38% - 8px);
-  width: 40px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 50%;
-  will-change: transform, opacity;
+.timer__value {
+  font-size: clamp(22px, 6vw, 44px);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 4px 4px 0 #000;
+  margin-top: 8px;
+  letter-spacing: 1px;
 }
 
-/* ---- Bullet Bill ---- */
-.bullet {
-  position: absolute;
-  left: 0;
-  bottom: calc(38% + 28px);
-  width: 60px;
-  height: 48px;
-  will-change: transform, opacity;
-  filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.35));
-}
-
-/* ---- Aftermath runners (Penguin, Toad, BigPen, Kirby) ---- */
-.runner {
-  position: absolute;
-  left: 0;
-  bottom: 38%;
-  width: 48px;
-  height: 48px;
-  will-change: transform, opacity;
-}
-.runner__shadow {
-  position: absolute;
-  left: 0;
-  bottom: calc(38% - 8px);
-  width: 40px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-/* ---- End-of-level castle ---- */
-.castle {
-  position: absolute;
-  left: 0;
-  bottom: 38%;
-  width: 104px;
-  height: 104px;
-  display: none;
-  will-change: transform, opacity;
-}
-.castle__pole {
-  position: absolute;
-  left: 50px;
-  bottom: 100%;
-  width: 3px;
-  height: 42px;
-  background: #4a4a4a;
-}
-.castle__flag {
-  position: absolute;
-  left: 53px;
-  bottom: calc(100% + 28px);
-  width: 20px;
-  height: 14px;
-  background: #e52521;
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-  opacity: 0;
-  transform-origin: left center;
-  will-change: transform;
-}
-.castle__rubble {
-  display: none;
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.castle--broken .castle__sprite,
-.castle--broken .castle__pole,
-.castle--broken .castle__flag {
-  display: none;
-}
-.castle--broken .castle__rubble {
-  display: block;
-}
-.castle--broken .castle__rubble::before,
-.castle--broken .castle__rubble::after {
-  content: "";
-  position: absolute;
-  background: #9a9a9a;
+.bezel {
+  position: relative;
+  border: 6px solid #1a1a1a;
+  border-radius: 8px;
   box-shadow:
-    12px -8px 0 #7a7a7a,
-    -10px 6px 0 #b0b0b0,
-    22px 10px 0 #5a5a5a,
-    -18px -4px 0 #8a8a8a,
-    4px 18px 0 #6a6a6a;
+    0 0 0 3px #fcbc3c,
+    0 16px 40px rgba(0, 0, 0, 0.45);
+  background: #000;
+  line-height: 0;
 }
-.castle--broken .castle__rubble::before {
-  left: 18px;
-  bottom: 8px;
-  width: 28px;
-  height: 22px;
-  transform: rotate(-18deg);
-  animation: rubble-a 0.7s ease-out forwards;
+
+.game-canvas {
+  display: block;
+  width: min(96vw, 1280px);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #5c94fc;
+  outline: none;
 }
-.castle--broken .castle__rubble::after {
-  right: 14px;
-  bottom: 4px;
-  width: 34px;
-  height: 18px;
-  background: #8a8a8a;
-  transform: rotate(14deg);
-  animation: rubble-b 0.75s ease-out forwards;
+
+.help {
+  font-size: 8px;
+  opacity: 0.7;
+  text-align: center;
+  max-width: 92vw;
+  line-height: 1.7;
+  text-shadow: 1px 1px 0 #000;
 }
-@keyframes rubble-a {
-  0% { transform: translate(0, 0) rotate(-18deg); opacity: 1; }
-  100% { transform: translate(-36px, 40px) rotate(-48deg); opacity: 0.2; }
+
+.disclaimer {
+  font-size: 8px;
+  opacity: 0.65;
+  text-align: center;
+  text-shadow: 1px 1px 0 #000;
 }
-@keyframes rubble-b {
-  0% { transform: translate(0, 0) rotate(14deg); opacity: 1; }
-  100% { transform: translate(42px, 36px) rotate(52deg); opacity: 0.2; }
+
+.pad {
+  display: none;
+  width: min(96vw, 1280px);
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 4px 0 0;
+  user-select: none;
+  touch-action: none;
+}
+
+.pad__dir,
+.pad__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pad__btn {
+  font-family: inherit;
+  font-size: 12px;
+  width: 64px;
+  height: 64px;
+  border: 3px solid #000;
+  border-radius: 50%;
+  background: #c84c0c;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  box-shadow: inset 0 -4px 0 #8c3c00, 0 4px 0 #000;
+}
+.pad__btn--a {
+  background: #e52521;
+  box-shadow: inset 0 -4px 0 #9a1810, 0 4px 0 #000;
+}
+.pad__btn--wide {
+  width: 72px;
+  border-radius: 16px;
+  background: #2057d6;
+  box-shadow: inset 0 -4px 0 #143a96, 0 4px 0 #000;
+}
+.pad__btn:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 -1px 0 #000, 0 1px 0 #000;
+}
+
+@media (pointer: coarse), (max-width: 800px) {
+  body {
+    overflow: auto;
+  }
+  .pad {
+    display: flex;
+  }
+  .help {
+    display: none;
+  }
 }
