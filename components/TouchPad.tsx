@@ -27,6 +27,9 @@ function PadButton({
     e.preventDefault();
     onSend(action, false);
   };
+  const context = (e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+  };
   return (
     <button
       type="button"
@@ -35,6 +38,7 @@ function PadButton({
       onPointerDown={down}
       onPointerUp={up}
       onPointerCancel={up}
+      onContextMenu={context}
     >
       {label}
     </button>

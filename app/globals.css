@@ -148,6 +148,11 @@ body {
   border-radius: 50%;
   background: #c84c0c;
   color: #fff;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   text-shadow: 1px 1px 0 #000;
   box-shadow:
     inset 0 -4px 0 #8c3c00,
@@ -180,6 +185,12 @@ body {
   }
   .pad {
     display: flex;
+  }
+  .pad,
+  .pad * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
   .help {
     display: none;
