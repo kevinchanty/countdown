@@ -1,3 +1,5 @@
+const gameOverSound = new URL("../../app/assets/sound/super-mario-game-over.mp3", import.meta.url).href;
+
 export class Sfx {
   private ctx: AudioContext | null = null;
   muted = false;
@@ -61,9 +63,10 @@ export class Sfx {
     this.tone(300, 0.18, "square", 0.07, 0, 90);
   }
   die() {
-    this.tone(480, 0.12, "square", 0.07, 0, 200);
-    this.tone(360, 0.16, "square", 0.07, 0.12, 140);
-    this.tone(180, 0.35, "square", 0.07, 0.28, 60);
+    if (this.muted) return;
+    const audio = new Audio(gameOverSound);
+    audio.volume = 0.7;
+    void audio.play().catch(() => undefined);
   }
   flag() {
     this.tone(523, 0.1, "square", 0.06);
